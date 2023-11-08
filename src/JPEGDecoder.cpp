@@ -71,12 +71,15 @@ bool JPEGDecoder::parseMarkers() {
                     return false;
                 }
                 break;
-            case JPEG_DQT:
-                quantizationTables = parser->parseDQT();
+            case JPEG_DQT: {
+                auto tables = parser->parseDQT();
+                quantizationTables.insert(quantizationTables.end(), tables.begin(), tables.end());
                 if (quantizationTables.empty()) {
+                    std::cerr << "No quantization tables found" << std::endl;
                     return false;
                 }
                 break;
+            }
             case JPEG_SOS:
                 if (!parser->parseSOS()) {
                     return false;
