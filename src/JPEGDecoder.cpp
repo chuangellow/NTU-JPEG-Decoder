@@ -1,6 +1,4 @@
 #include "JPEGDecoder.h"
-#include "BitReader.h"
-#include "JPEGParser.h"
 
 JPEGDecoder::JPEGDecoder() : bitReader(nullptr), parser(nullptr) {
 }
@@ -74,7 +72,8 @@ bool JPEGDecoder::parseMarkers() {
                 }
                 break;
             case JPEG_DQT:
-                if (!parser->parseDQT()) {
+                quantizationTables = parser->parseDQT();
+                if (quantizationTables.empty()) {
                     return false;
                 }
                 break;

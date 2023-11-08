@@ -2,7 +2,9 @@
 #define JPEGPARSER_H
 
 #include "BitReader.h"
+#include "QuantizationTable.h"
 #include <cstdint>
+#include <vector>
 
 class JPEGParser {
 public:
@@ -11,7 +13,7 @@ public:
     bool parseAPP0();
     bool parseSOF0();
     bool parseDHT();
-    bool parseDQT();
+    std::vector<QuantizationTable> parseDQT();
     bool parseSOS();
 
 private:
