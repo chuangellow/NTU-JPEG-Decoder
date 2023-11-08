@@ -1,5 +1,5 @@
 # NTU-JPEG-Decoder
-Source code for JPEG-Decoder for ITCT course
+Source code of JPEG-Decoder for ITCT course
 
 ## Prerequisites
 
