@@ -1,18 +1,21 @@
 #include "JPEGDecoder.h"
 #include "BitReader.h"
+#include "JPEGParser.h"
 
-JPEGDecoder::JPEGDecoder() {
+JPEGDecoder::JPEGDecoder() : bitReader(nullptr), parser(nullptr) {
 }
 
 JPEGDecoder::~JPEGDecoder() {
+    if (bitReader != nullptr) {
+        delete bitReader;
+    }
+    if (parser != nullptr) {
+        delete parser;
+    }
 }
 
 bool JPEGDecoder::decode(const std::string& inputFilePath, const std::string& outputFilePath) {
     if (!readJPEGFile(inputFilePath)) {
-        return false;
-    }
-
-    if (!parseMarkers()) {
         return false;
     }
 
@@ -36,46 +39,54 @@ bool JPEGDecoder::decode(const std::string& inputFilePath, const std::string& ou
 }
 
 bool JPEGDecoder::readJPEGFile(const std::string& filePath) {
-    BitReader bitReader(filePath);
-    if (!bitReader.is_open()) {
+    bitReader = new BitReader(filePath);
+    if (!bitReader->is_open()) {
         return false;
     }
 
     // Read SOI marker
-    if (bitReader.readWord() != JPEG_SOI) {
+    if (bitReader->readWord() != JPEG_SOI) {
         return false;
     }
 
-    // Read markers
-    while (true) {
-        uint16_t marker = bitReader.readWord();
-        uint16_t segmentLength = 0;
-        switch (marker) {
-            case JPEG_APP0:
-                break;
-            case JPEG_SOF0: // Baseline DCT
-                segmentLength = bitReader.readWord();
-                break;
-            case JPEG_DHT: // Huffman table
-                segmentLength = bitReader.readWord();
-                break;
-            case JPEG_DQT: // Quantization table
-                segmentLength = bitReader.readWord();
-                break;
-            case JPEG_SOS: // Start of scan
-                segmentLength = bitReader.readWord();
-                break;
-            case JPEG_EOI: // End of image
-                segmentLength = bitReader.readWord();
-                return true;
-            default:
-                break;
-        }
+    parser = new JPEGParser(*bitReader);
+    if (!parseMarkers()) {
+        return false;
     }
     return true;
 }
 
 bool JPEGDecoder::parseMarkers() {
+    if (!parser) {
+        return false;
+    }
+    uint16_t marker = 0;
+    while ((marker = bitReader->readWord()) != JPEG_EOI) {
+        switch (marker) {
+            case JPEG_SOF0:
+                if (!parser->parseSOF0()) {
+                    return false;
+                }
+                break;
+            case JPEG_DHT:
+                if (!parser->parseDHT()) {
+                    return false;
+                }
+                break;
+            case JPEG_DQT:
+                if (!parser->parseDQT()) {
+                    return false;
+                }
+                break;
+            case JPEG_SOS:
+                if (!parser->parseSOS()) {
+                    return false;
+                }
+                break;
+            default:
+                break;
+        }
+    }
     return true;
 }
 

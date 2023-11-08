@@ -3,6 +3,8 @@
 
 #include <string>
 #include <iostream>
+#include "BitReader.h"
+#include "JPEGParser.h"
 
 const uint16_t JPEG_APP0 = 0xFFE0;
 const uint16_t JPEG_SOI = 0xFFD8;
@@ -20,6 +22,8 @@ public:
     bool decode(const std::string& inputFilePath, const std::string& outputFilePath);
 
 private:
+    BitReader* bitReader;
+    JPEGParser* parser;
     bool readJPEGFile(const std::string& filePath);
     bool parseMarkers();
     bool decodeHuffmanData();

@@ -5,7 +5,7 @@ project(JPEGDecoder VERSION 1.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-add_executable(JPEGDecoder ${PROJECT_SOURCE_DIR}/src/main.cpp ${PROJECT_SOURCE_DIR}/src/JPEGDecoder.cpp)
+add_executable(JPEGDecoder src/main.cpp src/JPEGDecoder.cpp src/BitReader.cpp src/JPEGParser.cpp)
 
 # If you have other .cpp files or a library to include, you can add them like this:
 # add_executable(JPEGDecoder main.cpp JPEGDecoder.cpp OtherFile1.cpp OtherFile2.cpp)
