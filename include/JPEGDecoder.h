@@ -6,6 +6,7 @@
 #include "BitReader.h"
 #include "JPEGParser.h"
 #include "QuantizationTable.h"
+#include "HuffmanTable.h"
 
 const uint16_t JPEG_APP0 = 0xFFE0;
 const uint16_t JPEG_SOI = 0xFFD8;
@@ -26,6 +27,7 @@ private:
     BitReader* bitReader;
     JPEGParser* parser;
     std::vector<QuantizationTable> quantizationTables;
+    std::vector<HuffmanTable> huffmanTables;
     bool readJPEGFile(const std::string& filePath);
     bool parseMarkers();
     bool decodeHuffmanData();

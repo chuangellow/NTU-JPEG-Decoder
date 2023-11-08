@@ -13,8 +13,8 @@ public:
     uint16_t getValue(int index) const;
 
 private:
-    uint8_t tableID;
-    uint8_t precision;
+    uint8_t tableID; // 0-3
+    uint8_t precision; // 0-1
     std::vector<uint16_t> values;
 };
 

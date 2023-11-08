@@ -3,6 +3,7 @@
 
 #include "BitReader.h"
 #include "QuantizationTable.h"
+#include "HuffmanTable.h"
 #include <cstdint>
 #include <vector>
 
@@ -12,7 +13,7 @@ public:
     
     bool parseAPP0();
     bool parseSOF0();
-    bool parseDHT();
+    std::vector<HuffmanTable> parseDHT();
     std::vector<QuantizationTable> parseDQT();
     bool parseSOS();
 

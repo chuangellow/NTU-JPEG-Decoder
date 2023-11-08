@@ -14,22 +14,27 @@ JPEGDecoder::~JPEGDecoder() {
 
 bool JPEGDecoder::decode(const std::string& inputFilePath, const std::string& outputFilePath) {
     if (!readJPEGFile(inputFilePath)) {
+        std::cerr << "Failed to read JPEG file" << std::endl;
         return false;
     }
 
     if (!decodeHuffmanData()) {
+        std::cerr << "Failed to decode Huffman data" << std::endl;
         return false;
     }
 
     if (!performIDCT()) {
+        std::cerr << "Failed to perform IDCT" << std::endl;
         return false;
     }
 
     if (!convertColorSpace()) {
+        std::cerr << "Failed to convert color space" << std::endl;
         return false;
     }
 
     if (!writeBMPFile(outputFilePath)) {
+        std::cerr << "Failed to write BMP file" << std::endl;
         return false;
     }
 
@@ -60,17 +65,24 @@ bool JPEGDecoder::parseMarkers() {
     }
     uint16_t marker = 0;
     while ((marker = bitReader->readWord()) != JPEG_EOI) {
+        std::cout << "Marker: " << std::hex << marker << std::endl;
         switch (marker) {
             case JPEG_SOF0:
                 if (!parser->parseSOF0()) {
                     return false;
                 }
                 break;
-            case JPEG_DHT:
-                if (!parser->parseDHT()) {
+            case JPEG_DHT: {
+            /*
+                auto tables = parser->parseDHT();
+                huffmanTables.insert(huffmanTables.end(), tables.begin(), tables.end());
+                if (huffmanTables.empty()) {
+                    std::cerr << "No Huffman tables found" << std::endl;
                     return false;
                 }
                 break;
+            */
+            }
             case JPEG_DQT: {
                 auto tables = parser->parseDQT();
                 quantizationTables.insert(quantizationTables.end(), tables.begin(), tables.end());
