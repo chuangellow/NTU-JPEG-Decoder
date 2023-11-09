@@ -14,3 +14,19 @@ void HuffmanTable::setCodes(const uint8_t lengths[16], const uint8_t* codes, siz
 
     symbols.assign(codes, codes + totalCodes);
 }
+
+std::vector<uint8_t> HuffmanTable::getSymbols() const {
+    return symbols;
+}
+
+uint8_t HuffmanTable::getTableClass() const {
+    return tableClass;
+}
+
+uint8_t HuffmanTable::getTableID() const {
+    return tableID;
+}
+
+uint8_t HuffmanTable::getCodeLength(uint8_t symbol) const {
+    return codeLengths[symbol];
+}
