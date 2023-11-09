@@ -8,13 +8,14 @@
 #include "QuantizationTable.h"
 #include "HuffmanTable.h"
 
-const uint16_t JPEG_APP0 = 0xFFE0;
-const uint16_t JPEG_SOI = 0xFFD8;
-const uint16_t JPEG_EOI = 0xFFD9;
-const uint16_t JPEG_SOF0 = 0xFFC0;
-const uint16_t JPEG_DHT = 0xFFC4;
-const uint16_t JPEG_DQT = 0xFFDB;
-const uint16_t JPEG_SOS = 0xFFDA;
+const uint8_t JPEG_PREFIX = 0xFF;
+const uint8_t JPEG_APP0 = 0xE0;
+const uint8_t JPEG_SOI = 0xD8;
+const uint8_t JPEG_EOI = 0xD9;
+const uint8_t JPEG_SOF0 = 0xC0;
+const uint8_t JPEG_DHT = 0xC4;
+const uint8_t JPEG_DQT = 0xDB;
+const uint8_t JPEG_SOS = 0xDA;
 
 class JPEGDecoder {
 public:

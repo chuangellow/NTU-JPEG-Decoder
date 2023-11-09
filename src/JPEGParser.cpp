@@ -65,7 +65,6 @@ std::vector<QuantizationTable> JPEGParser::parseDQT() {
         tables.push_back(qt);
         length -= (precision == 0) ? (1 + 64) : (1 + 64 * 2);
     }
-
     return tables;
 }
 

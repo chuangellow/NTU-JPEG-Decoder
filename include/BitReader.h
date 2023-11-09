@@ -12,6 +12,7 @@ public:
 
     void close();
     bool is_open() const;
+    int getBitsLeft() const;
 
     unsigned int readBit();
     unsigned char readByte();

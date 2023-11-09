@@ -44,16 +44,13 @@ bool JPEGDecoder::decode(const std::string& inputFilePath, const std::string& ou
 bool JPEGDecoder::readJPEGFile(const std::string& filePath) {
     bitReader = new BitReader(filePath);
     if (!bitReader->is_open()) {
-        return false;
-    }
-
-    // Read SOI marker
-    if (bitReader->readWord() != JPEG_SOI) {
+        std::cerr << "Failed to open file: " << filePath << std::endl;
         return false;
     }
 
     parser = new JPEGParser(*bitReader);
     if (!parseMarkers()) {
+        std::cerr << "Failed to parse markers" << std::endl;
         return false;
     }
     return true;
@@ -61,19 +58,24 @@ bool JPEGDecoder::readJPEGFile(const std::string& filePath) {
 
 bool JPEGDecoder::parseMarkers() {
     if (!parser) {
+        std::cerr << "Parser is not initialized" << std::endl;
         return false;
     }
-    uint16_t marker = 0;
-    while ((marker = bitReader->readWord()) != JPEG_EOI) {
-        std::cout << "Marker: " << std::hex << marker << std::endl;
+    uint8_t marker = 0;
+    bool flag = true;
+    while (flag) {
+        marker = parser->bitReader.readByte();
+        if (marker != JPEG_PREFIX) continue;
+        marker = parser->bitReader.readByte();
         switch (marker) {
+            case JPEG_SOI:
+                break;
             case JPEG_SOF0:
                 if (!parser->parseSOF0()) {
                     return false;
                 }
                 break;
             case JPEG_DHT: {
-            /*
                 auto tables = parser->parseDHT();
                 huffmanTables.insert(huffmanTables.end(), tables.begin(), tables.end());
                 if (huffmanTables.empty()) {
@@ -81,7 +83,6 @@ bool JPEGDecoder::parseMarkers() {
                     return false;
                 }
                 break;
-            */
             }
             case JPEG_DQT: {
                 auto tables = parser->parseDQT();
@@ -96,6 +97,9 @@ bool JPEGDecoder::parseMarkers() {
                 if (!parser->parseSOS()) {
                     return false;
                 }
+                break;
+            case JPEG_EOI:
+                flag = false;
                 break;
             default:
                 break;

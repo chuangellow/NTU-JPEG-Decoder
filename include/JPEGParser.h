@@ -16,8 +16,6 @@ public:
     std::vector<HuffmanTable> parseDHT();
     std::vector<QuantizationTable> parseDQT();
     bool parseSOS();
-
-private:
     BitReader& bitReader;
 };
 

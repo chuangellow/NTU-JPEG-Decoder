@@ -17,10 +17,18 @@ bool BitReader::is_open() const {
     return fileStream.is_open();
 }
 
+int BitReader::getBitsLeft() const {
+    return bitsLeft;
+}
+
 void BitReader::fillBuffer() {
     if (fileStream.good() && bitsLeft == 0) {
         buffer = fileStream.get();
         bitsLeft = 8;
+    }
+    else {
+        buffer = 0;
+        bitsLeft = 0;
     }
 }
 
