@@ -71,11 +71,11 @@ bool JPEGDecoder::parseMarkers() {
             case JPEG_SOI:
                 std::cout << "Start of image" << std::endl;
                 break;
-            case JPEG_SOF0:
-                if (!parser->parseSOF0()) {
-                    return false;
-                }
+            case JPEG_SOF0: {
+                std::cout << "Parsing baseline DCT" << std::endl;
+                auto frameParameter = parser->parseSOF0();
                 break;
+            }
             case JPEG_DHT: {
                 std::cout << "Parsing Huffman tables" << std::endl;
                 auto tables = parser->parseDHT();

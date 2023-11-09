@@ -7,6 +7,7 @@
 #include "JPEGParser.h"
 #include "QuantizationTable.h"
 #include "HuffmanTable.h"
+#include "FrameParameter.h"
 
 const uint8_t JPEG_PREFIX = 0xFF;
 const uint8_t JPEG_APP0 = 0xE0;
@@ -27,6 +28,7 @@ public:
 private:
     BitReader* bitReader;
     JPEGParser* parser;
+    FrameParameter* frameParameter;
     std::vector<QuantizationTable> quantizationTables;
     std::vector<HuffmanTable> huffmanTables;
     bool readJPEGFile(const std::string& filePath);

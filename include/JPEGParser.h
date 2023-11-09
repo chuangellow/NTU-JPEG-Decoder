@@ -4,6 +4,7 @@
 #include "BitReader.h"
 #include "QuantizationTable.h"
 #include "HuffmanTable.h"
+#include "FrameParameter.h"
 #include <cstdint>
 #include <vector>
 
@@ -12,7 +13,7 @@ public:
     explicit JPEGParser(BitReader& reader);
     
     bool parseAPP0();
-    bool parseSOF0();
+    FrameParameter parseSOF0();
     std::vector<HuffmanTable> parseDHT();
     std::vector<QuantizationTable> parseDQT();
     bool parseSOS();
