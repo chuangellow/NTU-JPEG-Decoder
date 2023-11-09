@@ -13,6 +13,10 @@ uint8_t QuantizationTable::getTableID() const {
     return tableID;
 }
 
+uint8_t QuantizationTable::getPrecision() const {
+    return precision;
+}
+
 uint16_t QuantizationTable::getValue(int index) const {
     if (index >= 0 && index < values.size()) {
         return values[index];

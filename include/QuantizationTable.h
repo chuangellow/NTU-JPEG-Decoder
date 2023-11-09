@@ -10,6 +10,7 @@ public:
 
     void setValue(int index, uint16_t value);
     uint8_t getTableID() const;
+    uint8_t getPrecision() const;
     uint16_t getValue(int index) const;
 
 private:
