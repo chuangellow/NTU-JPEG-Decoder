@@ -8,6 +8,27 @@ bool JPEGParser::parseAPP0() {
 }
 
 bool JPEGParser::parseSOF0() {
+    uint16_t length = bitReader.readWord() - 2;
+    uint8_t precision = bitReader.readByte();
+    uint16_t height = bitReader.readWord();
+    uint16_t width = bitReader.readWord();
+    uint8_t numComponents = bitReader.readByte();
+
+    if (precision != 8) {
+        std::cerr << "Unsupported precision: " << precision << std::endl;
+        return false;
+    }
+
+    if (numComponents != 3) {
+        std::cerr << "Unsupported number of components: " << numComponents << std::endl;
+        return false;
+    }
+
+    for (int i = 0; i < numComponents; ++i) {
+        uint8_t componentID = bitReader.readByte();
+        uint8_t samplingFactors = bitReader.readByte();
+        uint8_t quantizationTableID = bitReader.readByte();
+    }
     return true;
 }
 
