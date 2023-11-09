@@ -5,6 +5,7 @@
 #include "QuantizationTable.h"
 #include "HuffmanTable.h"
 #include "FrameParameter.h"
+#include "ScanParameter.h"
 #include <cstdint>
 #include <vector>
 
@@ -16,7 +17,7 @@ public:
     FrameParameter parseSOF0();
     std::vector<HuffmanTable> parseDHT();
     std::vector<QuantizationTable> parseDQT();
-    bool parseSOS();
+    ScanParameter parseSOS();
     BitReader& bitReader;
 };
 

@@ -97,11 +97,12 @@ bool JPEGDecoder::parseMarkers() {
                 }
                 break;
             }
-            case JPEG_SOS:
-                if (!parser->parseSOS()) {
-                    return false;
-                }
+            case JPEG_SOS: {
+                std::cout << "Parsing scan data" << std::endl;
+                auto scanParameter = parser->parseSOS();
+                scanParameter.printScanParameter();
                 break;
+            }
             case JPEG_EOI:
                 std::cout << "End of image" << std::endl;
                 flag = false;

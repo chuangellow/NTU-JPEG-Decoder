@@ -14,7 +14,7 @@ FrameParameter JPEGParser::parseSOF0() {
     uint16_t width = bitReader.readWord();
     uint8_t numComponents = bitReader.readByte();
 
-    std::vector<Component> components;
+    std::vector<FrameComponent> components;
 
     for (int i = 0; i < numComponents; ++i) {
         uint8_t componentID = bitReader.readByte();
@@ -22,7 +22,7 @@ FrameParameter JPEGParser::parseSOF0() {
         uint8_t horizontalSamplingFactor = samplingFactors >> 4;
         uint8_t verticalSamplingFactor = samplingFactors & 0x0F;
         uint8_t quantizationTableID = bitReader.readByte();
-        Component component(componentID, horizontalSamplingFactor, verticalSamplingFactor, quantizationTableID);
+        FrameComponent component(componentID, horizontalSamplingFactor, verticalSamplingFactor, quantizationTableID);
         components.push_back(component);
     }
     return FrameParameter(0, precision, height, width, numComponents, components);
@@ -85,6 +85,23 @@ std::vector<QuantizationTable> JPEGParser::parseDQT() {
     return tables;
 }
 
-bool JPEGParser::parseSOS() {
-    return true;
+ScanParameter JPEGParser::parseSOS() {
+    uint16_t length = bitReader.readWord() - 2;
+    uint8_t numComponents = bitReader.readByte();
+    std::vector<ScanComponent> components;
+    for (int i = 0; i < numComponents; ++i) {
+        uint8_t componentID = bitReader.readByte();
+        uint8_t huffmanTableIDs = bitReader.readByte();
+        uint8_t dcTableID = huffmanTableIDs >> 4;
+        uint8_t acTableID = huffmanTableIDs & 0x0F;
+        ScanComponent component(componentID, dcTableID, acTableID);
+        components.push_back(component);
+    }
+    length -= 1 + numComponents * 2;
+    while (length > 0) {
+        bitReader.readByte();
+        length -= 1;
+    }
+
+    return ScanParameter(numComponents, components);
 }

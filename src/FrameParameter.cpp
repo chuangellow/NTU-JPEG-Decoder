@@ -1,30 +1,30 @@
 #include "FrameParameter.h"
 
-FrameParameter::FrameParameter(uint8_t frameType, uint8_t precision, uint16_t height, uint16_t width, uint8_t numComponents, std::vector<Component> components)
+FrameParameter::FrameParameter(uint8_t frameType, uint8_t precision, uint16_t height, uint16_t width, uint8_t numComponents, std::vector<FrameComponent> components)
     : frameType(frameType), precision(precision), height(height), width(width), numComponents(numComponents), components(components) {
 }
 
-Component::Component(uint8_t id, uint8_t horizontalSamplingFactor, uint8_t verticalSamplingFactor, uint8_t quantizationTableID)
+FrameComponent::FrameComponent(uint8_t id, uint8_t horizontalSamplingFactor, uint8_t verticalSamplingFactor, uint8_t quantizationTableID)
     : componentID(id), horizontalSamplingFactor(horizontalSamplingFactor), verticalSamplingFactor(verticalSamplingFactor), quantizationTableID(quantizationTableID) {
 }
 
-uint8_t Component::getComponentID() {
+uint8_t FrameComponent::getComponentID() {
     return componentID;
 }
 
-uint8_t Component::getHorizontalSamplingFactor() {
+uint8_t FrameComponent::getHorizontalSamplingFactor() {
     return horizontalSamplingFactor;
 }
 
-uint8_t Component::getVerticalSamplingFactor() {
+uint8_t FrameComponent::getVerticalSamplingFactor() {
     return verticalSamplingFactor;
 }
 
-uint8_t Component::getQuantizationTableID() {
+uint8_t FrameComponent::getQuantizationTableID() {
     return quantizationTableID;
 }
 
-void Component::printComponentInfo() {
+void FrameComponent::printComponentInfo() {
     std::cout << "Component Info:" << std::endl;
     std::cout << "Component ID: " << (int)componentID << std::endl;
     std::cout << "Horizontal Sampling Factor: " << (int)horizontalSamplingFactor << std::endl;
@@ -66,6 +66,6 @@ void FrameParameter::printFrameParameter() {
     return;
 }
 
-std::vector<Component> FrameParameter::getComponents() {
+std::vector<FrameComponent> FrameParameter::getComponents() {
     return components;
 }
