@@ -74,6 +74,7 @@ bool JPEGDecoder::parseMarkers() {
             case JPEG_SOF0: {
                 std::cout << "Parsing baseline DCT" << std::endl;
                 auto frameParameter = parser->parseSOF0();
+                //frameParameter.printFrameParameter();
                 break;
             }
             case JPEG_DHT: {

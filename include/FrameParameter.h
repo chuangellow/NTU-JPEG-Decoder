@@ -1,11 +1,17 @@
 #ifndef FRMAEPARAMETER_H
 #define FRMAEPARAMETER_H
 
+#include <iostream>
 #include <vector>
 
 class Component {
 public:
     Component(uint8_t componentId, uint8_t horizontalSamplingFactor, uint8_t verticalSamplingFactor, uint8_t quantizationTableID);
+    uint8_t getComponentID();
+    uint8_t getHorizontalSamplingFactor();
+    uint8_t getVerticalSamplingFactor();
+    uint8_t getQuantizationTableID();
+    void printComponentInfo();
 private:
     uint8_t componentID;
     uint8_t horizontalSamplingFactor;
@@ -22,6 +28,7 @@ public:
     uint16_t getWidth();
     uint8_t getNumComponents();
     std::vector<Component> getComponents();
+    void printFrameParameter();
 private:
     uint8_t frameType;
     uint8_t precision;
