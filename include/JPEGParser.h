@@ -1,6 +1,7 @@
 #ifndef JPEGPARSER_H
 #define JPEGPARSER_H
 
+#include "JPEGMarker.h"
 #include "BitReader.h"
 #include "QuantizationTable.h"
 #include "HuffmanTable.h"
@@ -18,6 +19,7 @@ public:
     std::vector<HuffmanTable> parseDHT();
     std::vector<QuantizationTable> parseDQT();
     ScanParameter parseSOS();
+    std::vector<uint8_t> parseScanData();
     BitReader& bitReader;
 };
 

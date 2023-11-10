@@ -69,16 +69,13 @@ bool JPEGDecoder::parseMarkers() {
         marker = parser->bitReader.readByte();
         switch (marker) {
             case JPEG_SOI:
-                std::cout << "Start of image" << std::endl;
                 break;
             case JPEG_SOF0: {
-                std::cout << "Parsing baseline DCT" << std::endl;
-                auto frameParameter = parser->parseSOF0();
-                //frameParameter.printFrameParameter();
+                frameParameter = parser->parseSOF0();
+                frameParameter.printFrameParameter();
                 break;
             }
             case JPEG_DHT: {
-                std::cout << "Parsing Huffman tables" << std::endl;
                 auto tables = parser->parseDHT();
                 huffmanTables.insert(huffmanTables.end(), tables.begin(), tables.end());
                 if (huffmanTables.empty()) {
@@ -88,7 +85,6 @@ bool JPEGDecoder::parseMarkers() {
                 break;
             }
             case JPEG_DQT: {
-                std::cout << "Parsing quantization tables" << std::endl;
                 auto tables = parser->parseDQT();
                 quantizationTables.insert(quantizationTables.end(), tables.begin(), tables.end());
                 if (quantizationTables.empty()) {
@@ -98,13 +94,12 @@ bool JPEGDecoder::parseMarkers() {
                 break;
             }
             case JPEG_SOS: {
-                std::cout << "Parsing scan data" << std::endl;
-                auto scanParameter = parser->parseSOS();
+                scanParameter = parser->parseSOS();
                 scanParameter.printScanParameter();
+                compressedData = parser->parseScanData();
                 break;
             }
             case JPEG_EOI:
-                std::cout << "End of image" << std::endl;
                 flag = false;
                 break;
             default:

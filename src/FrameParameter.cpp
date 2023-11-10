@@ -1,5 +1,14 @@
 #include "FrameParameter.h"
 
+FrameParameter::FrameParameter() {
+    frameType = -1;
+    precision = 0;
+    height = 0;
+    width = 0;
+    numComponents = 0;
+    components = std::vector<FrameComponent>();
+}
+
 FrameParameter::FrameParameter(uint8_t frameType, uint8_t precision, uint16_t height, uint16_t width, uint8_t numComponents, std::vector<FrameComponent> components)
     : frameType(frameType), precision(precision), height(height), width(width), numComponents(numComponents), components(components) {
 }
@@ -25,7 +34,7 @@ uint8_t FrameComponent::getQuantizationTableID() {
 }
 
 void FrameComponent::printComponentInfo() {
-    std::cout << "Component Info:" << std::endl;
+    std::cout << "Frame Component Info:" << std::endl;
     std::cout << "Component ID: " << (int)componentID << std::endl;
     std::cout << "Horizontal Sampling Factor: " << (int)horizontalSamplingFactor << std::endl;
     std::cout << "Vertical Sampling Factor: " << (int)verticalSamplingFactor << std::endl;

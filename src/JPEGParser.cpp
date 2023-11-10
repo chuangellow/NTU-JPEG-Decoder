@@ -105,3 +105,6 @@ ScanParameter JPEGParser::parseSOS() {
 
     return ScanParameter(numComponents, components);
 }
+
+std::vector<uint8_t> JPEGParser::parseScanData() {
+}

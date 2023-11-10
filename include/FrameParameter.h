@@ -21,6 +21,7 @@ private:
 
 class FrameParameter {
 public:
+    FrameParameter();
     FrameParameter(uint8_t frameType, uint8_t precision, uint16_t height, uint16_t width, uint8_t numComponents, std::vector<FrameComponent> components);
     uint8_t getFrameType();
     uint8_t getPrecision();

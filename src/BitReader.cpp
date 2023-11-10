@@ -54,3 +54,14 @@ unsigned short BitReader::readWord() {
     word = (word << 8) | readByte();
     return word;
 }
+
+void BitReader::unreadBit(unsigned int bit) {
+    buffer = (buffer << 1) | bit;
+    bitsLeft++;
+}
+
+void BitReader::unreadByte(unsigned char byte) {
+    for (int i = 7; i >= 0; i--) {
+        unreadBit((byte >> i) & 1);
+    }
+}

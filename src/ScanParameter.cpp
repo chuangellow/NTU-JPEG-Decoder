@@ -1,5 +1,10 @@
 #include "ScanParameter.h"
 
+ScanParameter::ScanParameter() {
+    numComponents = 0;
+    components = std::vector<ScanComponent>();
+}
+
 ScanComponent::ScanComponent(uint8_t componentID, uint8_t dcTableID, uint8_t acTableID)
     : componentID(componentID), dcTableID(dcTableID), acTableID(acTableID) {
 }
@@ -21,6 +26,7 @@ uint8_t ScanComponent::getACTableID() {
 }
 
 void ScanComponent::printComponentInfo() {
+    std::cout << "Scan Component Info: " << std::endl;
     std::cout << "Component ID: " << (int)componentID << std::endl;
     std::cout << "DC Table ID: " << (int)dcTableID << std::endl;
     std::cout << "AC Table ID: " << (int)acTableID << std::endl;

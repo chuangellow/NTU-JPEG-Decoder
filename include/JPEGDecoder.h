@@ -3,21 +3,13 @@
 
 #include <string>
 #include <iostream>
+#include "JPEGMarker.h"
 #include "BitReader.h"
 #include "JPEGParser.h"
 #include "QuantizationTable.h"
 #include "HuffmanTable.h"
 #include "FrameParameter.h"
 #include "ScanParameter.h"
-
-const uint8_t JPEG_PREFIX = 0xFF;
-const uint8_t JPEG_APP0 = 0xE0;
-const uint8_t JPEG_SOI = 0xD8;
-const uint8_t JPEG_EOI = 0xD9;
-const uint8_t JPEG_SOF0 = 0xC0;
-const uint8_t JPEG_DHT = 0xC4;
-const uint8_t JPEG_DQT = 0xDB;
-const uint8_t JPEG_SOS = 0xDA;
 
 class JPEGDecoder {
 public:
@@ -29,8 +21,9 @@ public:
 private:
     BitReader* bitReader;
     JPEGParser* parser;
-    FrameParameter* frameParameter;
-    ScanParameter* scanParameter;
+    FrameParameter frameParameter;
+    ScanParameter scanParameter;
+    std::vector<uint8_t> compressedData;
     std::vector<QuantizationTable> quantizationTables;
     std::vector<HuffmanTable> huffmanTables;
     bool readJPEGFile(const std::string& filePath);

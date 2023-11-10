@@ -18,6 +18,9 @@ public:
     unsigned char readByte();
     unsigned short readWord();
 
+    void unreadBit(unsigned int bit);
+    void unreadByte(unsigned char byte);
+
 private:
     std::ifstream fileStream;
     unsigned char buffer;

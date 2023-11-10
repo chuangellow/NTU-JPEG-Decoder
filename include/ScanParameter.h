@@ -19,6 +19,7 @@ private:
 
 class ScanParameter {
 public:
+    ScanParameter();
     ScanParameter(uint8_t numComponents, std::vector<ScanComponent> components);
     uint8_t getNumComponents();
     std::vector<ScanComponent> getComponents();
