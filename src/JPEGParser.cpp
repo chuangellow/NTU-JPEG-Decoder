@@ -107,4 +107,24 @@ ScanParameter JPEGParser::parseSOS() {
 }
 
 std::vector<uint8_t> JPEGParser::parseScanData() {
+    std::vector<uint8_t> scanData;
+    uint8_t byteData = bitReader.readByte();
+    bool isEOI = true;
+    while (isEOI) {
+        if (byteData == JPEG_PREFIX) {
+            uint8_t nextByteData = bitReader.readByte();
+            if (nextByteData == JPEG_DATA) {
+                scanData.push_back(byteData);
+                byteData = bitReader.readByte();
+            }
+            else if (nextByteData == JPEG_EOI) {
+                isEOI = false;
+            }
+        }
+        else {
+            scanData.push_back(byteData);
+            byteData = bitReader.readByte();
+        }
+    }
+    return scanData;
 }

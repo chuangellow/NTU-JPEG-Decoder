@@ -72,7 +72,6 @@ bool JPEGDecoder::parseMarkers() {
                 break;
             case JPEG_SOF0: {
                 frameParameter = parser->parseSOF0();
-                frameParameter.printFrameParameter();
                 break;
             }
             case JPEG_DHT: {
@@ -95,13 +94,10 @@ bool JPEGDecoder::parseMarkers() {
             }
             case JPEG_SOS: {
                 scanParameter = parser->parseSOS();
-                scanParameter.printScanParameter();
                 compressedData = parser->parseScanData();
+                flag = false; // Check EOI marker in the parseScanData()
                 break;
             }
-            case JPEG_EOI:
-                flag = false;
-                break;
             default:
                 break;
         }

@@ -11,5 +11,6 @@ const uint8_t JPEG_SOF0 = 0xC0;
 const uint8_t JPEG_DHT = 0xC4;
 const uint8_t JPEG_DQT = 0xDB;
 const uint8_t JPEG_SOS = 0xDA;
+const uint8_t JPEG_DATA = 0x00;
 
 #endif // JPEGMARKER_H
