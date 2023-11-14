@@ -14,6 +14,7 @@ class JPEGParser {
 public:
     explicit JPEGParser(BitReader& reader);
     
+    uint16_t getLength();
     bool parseAPP0();
     FrameParameter parseSOF0();
     std::vector<HuffmanTable> parseDHT();

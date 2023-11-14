@@ -7,8 +7,12 @@ bool JPEGParser::parseAPP0() {
     return true;
 }
 
+uint16_t JPEGParser::getLength() {
+    return bitReader.readWord() - 2;
+}
+
 FrameParameter JPEGParser::parseSOF0() {
-    uint16_t length = bitReader.readWord() - 2;
+    uint16_t length = getLength();
     uint8_t precision = bitReader.readByte();
     uint16_t height = bitReader.readWord();
     uint16_t width = bitReader.readWord();
@@ -30,7 +34,7 @@ FrameParameter JPEGParser::parseSOF0() {
 
 std::vector<HuffmanTable> JPEGParser::parseDHT() {
     std::vector<HuffmanTable> huffmanTables;
-    uint16_t length = bitReader.readWord() - 2;
+    uint16_t length = getLength();
 
     while (length > 0) {
         uint8_t huffmanInfo = bitReader.readByte();
@@ -60,7 +64,7 @@ std::vector<HuffmanTable> JPEGParser::parseDHT() {
 
 std::vector<QuantizationTable> JPEGParser::parseDQT() {
     std::vector<QuantizationTable> tables;
-    uint16_t length = bitReader.readWord() - 2;
+    uint16_t length = getLength();
     
     while (length > 0) {
         uint8_t qtInfo = bitReader.readByte();
@@ -86,7 +90,7 @@ std::vector<QuantizationTable> JPEGParser::parseDQT() {
 }
 
 ScanParameter JPEGParser::parseSOS() {
-    uint16_t length = bitReader.readWord() - 2;
+    uint16_t length = getLength();
     uint8_t numComponents = bitReader.readByte();
     std::vector<ScanComponent> components;
     for (int i = 0; i < numComponents; ++i) {
