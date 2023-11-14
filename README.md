@@ -16,6 +16,7 @@ To build the project, follow these steps:
 3. Create a new directory for the build:
 
 ```
+$ cd ./JPEG-Decoder
 $ mkdir build
 $ cd build
 $ cmake ..
