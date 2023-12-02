@@ -126,16 +126,36 @@ bool JPEGDecoder::parseMarkers()
             break;
         }
     }
-    printCompressedData();
     return true;
+}
+
+void JPEGDecoder::printMarkers()
+{
+    std::cout << "SOF0:" << std::endl;
+    frameParameter.printFrameParameter();
+    std::cout << std::endl;
+
+    std::cout << "DHT:" << std::endl;
+    printAllHuffmanTreePaths();
+
+    std::cout << "DQT:" << std::endl;
+    for (int i = 0; i < quantizationTables.size(); ++i)
+    {
+        std::cout << "Table " << i << ":" << std::endl;
+        quantizationTables[i].printTable();
+    }
+
+    std::cout << "SOS:" << std::endl;
+    scanParameter.printScanParameter();
+    std::cout << std::endl;
 }
 
 void JPEGDecoder::printCompressedData()
 {
-    std::cout << "Compressed data: ";
+    std::cout << "Compressed data: " << std::endl;
     for (auto &data : compressedData)
     {
-        std::cout << std::hex << (int)data << " ";
+        std::cout << std::hex << (int)data << std::endl;
     }
     std::cout << std::endl;
 }

@@ -77,7 +77,7 @@ bool MCUDecoder::decodeBlock(ScanComponent &component)
     {
         int symbol = decodeSymbol(acTree);
         if (symbol == 0)
-        { // EOB
+        {
             break;
         }
 
