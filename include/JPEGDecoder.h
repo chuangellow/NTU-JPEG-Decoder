@@ -10,6 +10,7 @@
 #include "HuffmanTable.h"
 #include "FrameParameter.h"
 #include "ScanParameter.h"
+#include "MCUDecoder.h"
 
 class JPEGDecoder
 {
@@ -34,7 +35,6 @@ private:
     void buildHuffmanTrees();
     void printHuffmanTree(const std::shared_ptr<HuffmanNode> &node, int level = 0);
     void printHuffmanTrees();
-    int decodeSymbol(BitReader &reader, const std::shared_ptr<HuffmanNode> &tree);
     bool decodeHuffmanData();
     bool performIDCT();
     bool convertColorSpace();

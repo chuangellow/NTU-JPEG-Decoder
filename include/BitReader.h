@@ -16,6 +16,7 @@ public:
     int getBitsLeft() const;
 
     unsigned int readBit();
+    int readBits(int n);
     unsigned char readByte();
     unsigned short readWord();
 

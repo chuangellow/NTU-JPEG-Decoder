@@ -51,6 +51,16 @@ unsigned int BitReader::readBit()
     return bit;
 }
 
+int BitReader::readBits(int n)
+{
+    int value = 0;
+    for (int i = 0; i < n; ++i)
+    {
+        value = (value << 1) | readBit();
+    }
+    return value;
+}
+
 unsigned char BitReader::readByte()
 {
     unsigned char byte = 0;

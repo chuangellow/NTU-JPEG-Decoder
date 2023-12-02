@@ -182,26 +182,26 @@ void JPEGDecoder::printHuffmanTrees()
     }
 }
 
-int JPEGDecoder::decodeSymbol(BitReader &reader, const std::shared_ptr<HuffmanNode> &tree)
-{
-    auto node = tree;
-    while (node && node->value == -1)
-    {
-        if (reader.readBit() == 0)
-        {
-            node = node->left;
-        }
-        else
-        {
-            node = node->right;
-        }
-    }
-    return node ? node->value : -1;
-}
-
 bool JPEGDecoder::decodeHuffmanData()
 {
     buildHuffmanTrees();
+
+    MCUDecoder mcuDecoder(compressedData, frameParameter, scanParameter, quantizationTables, dcHuffmanTrees, acHuffmanTrees);
+
+    int mcuCountX = (frameParameter.getWidth() + 7) / 8;
+    int mcuCountY = (frameParameter.getHeight() + 7) / 8;
+
+    for (int y = 0; y < mcuCountY; ++y)
+    {
+        for (int x = 0; x < mcuCountX; ++x)
+        {
+            if (!mcuDecoder.decodeMCU())
+            {
+                std::cerr << "Failed to decode MCU at (" << x << ", " << y << ")" << std::endl;
+                return false;
+            }
+        }
+    }
     return true;
 }
 
