@@ -1,8 +1,10 @@
 #include <iostream>
 #include "JPEGDecoder.h"
 
-int main(int argc, char* argv[]) {
-    if (argc != 3) {
+int main(int argc, char *argv[])
+{
+    if (argc != 3)
+    {
         std::cerr << "Usage: " << argv[0] << " <input.jpg> <output.bmp>" << std::endl;
         return 1;
     }
@@ -14,7 +16,8 @@ int main(int argc, char* argv[]) {
 
     bool success = decoder.decode(inputFilePath, outputFilePath);
 
-    if (!success) {
+    if (!success)
+    {
         std::cerr << "Failed to decode the image." << std::endl;
         return 1;
     }

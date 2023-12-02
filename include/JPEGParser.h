@@ -10,10 +10,11 @@
 #include <cstdint>
 #include <vector>
 
-class JPEGParser {
+class JPEGParser
+{
 public:
-    explicit JPEGParser(BitReader& reader);
-    
+    explicit JPEGParser(BitReader &reader);
+
     uint16_t getLength();
     bool parseAPP0();
     FrameParameter parseSOF0();
@@ -21,7 +22,7 @@ public:
     std::vector<QuantizationTable> parseDQT();
     ScanParameter parseSOS();
     std::vector<uint8_t> parseScanData();
-    BitReader& bitReader;
+    BitReader &bitReader;
 };
 
 #endif

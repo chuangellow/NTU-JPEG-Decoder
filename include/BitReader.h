@@ -5,9 +5,10 @@
 #include <vector>
 #include <iostream>
 
-class BitReader {
+class BitReader
+{
 public:
-    explicit BitReader(const std::string& filePath);
+    explicit BitReader(const std::string &filePath);
     ~BitReader();
 
     void close();
