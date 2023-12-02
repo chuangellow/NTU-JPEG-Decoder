@@ -32,9 +32,10 @@ private:
     std::vector<std::shared_ptr<HuffmanNode>> acHuffmanTrees;
     bool readJPEGFile(const std::string &filePath);
     bool parseMarkers();
+    void printCompressedData();
     void buildHuffmanTrees();
-    void printHuffmanTree(const std::shared_ptr<HuffmanNode> &node, int level = 0);
-    void printHuffmanTrees();
+    void printHuffmanTreePaths(const std::shared_ptr<HuffmanNode> &node, const std::string &path);
+    void printAllHuffmanTreePaths();
     bool decodeHuffmanData();
     bool performIDCT();
     bool convertColorSpace();

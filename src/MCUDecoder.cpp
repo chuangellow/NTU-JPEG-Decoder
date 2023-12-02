@@ -15,8 +15,8 @@ bool MCUDecoder::decodeMCU()
 {
     for (auto &frameComponent : frameParam.getComponents())
     {
-        int hSampling = frameComponent.getHorizontalSamplingFactor();
-        int vSampling = frameComponent.getVerticalSamplingFactor();
+        int hSampling = (int)frameComponent.getHorizontalSamplingFactor();
+        int vSampling = (int)frameComponent.getVerticalSamplingFactor();
 
         ScanComponent *scanComponent = findScanComponent(frameComponent.getComponentID());
         if (!scanComponent)
@@ -72,13 +72,12 @@ bool MCUDecoder::decodeBlock(ScanComponent &component)
     dcCoefficient += previousDCCoefficient[componentID];
     previousDCCoefficient[componentID] = dcCoefficient;
 
-    // Decode the AC coefficients
     std::vector<int> acCoefficients(63, 0);
     for (int i = 0; i < 63; ++i)
     {
         int symbol = decodeSymbol(acTree);
         if (symbol == 0)
-        { // End of block (EOB)
+        { // EOB
             break;
         }
 
@@ -86,6 +85,7 @@ bool MCUDecoder::decodeBlock(ScanComponent &component)
         int size = symbol & 0xF;
 
         i += runLength;
+
         if (i >= 63)
         {
             std::cerr << "Run-length exceeds block size" << std::endl;

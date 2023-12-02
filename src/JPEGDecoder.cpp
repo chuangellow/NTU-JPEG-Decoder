@@ -126,7 +126,18 @@ bool JPEGDecoder::parseMarkers()
             break;
         }
     }
+    printCompressedData();
     return true;
+}
+
+void JPEGDecoder::printCompressedData()
+{
+    std::cout << "Compressed data: ";
+    for (auto &data : compressedData)
+    {
+        std::cout << std::hex << (int)data << " ";
+    }
+    std::cout << std::endl;
 }
 
 void JPEGDecoder::buildHuffmanTrees()
@@ -145,40 +156,34 @@ void JPEGDecoder::buildHuffmanTrees()
     }
 }
 
-void JPEGDecoder::printHuffmanTree(const std::shared_ptr<HuffmanNode> &node, int level)
+void JPEGDecoder::printHuffmanTreePaths(const std::shared_ptr<HuffmanNode> &node, const std::string &path)
 {
     if (!node)
-    {
         return;
-    }
-    for (int i = 0; i < level; ++i)
-    {
-        std::cout << "  ";
-    }
 
     if (node->value != -1)
     {
-        std::cout << "Value: " << node->value << "\n";
+        std::cout << path << " 0x" << std::hex << node->value << std::dec << std::endl;
     }
     else
     {
-        std::cout << "Node\n";
+        printHuffmanTreePaths(node->left, path + "0");
+        printHuffmanTreePaths(node->right, path + "1");
     }
-    printHuffmanTree(node->left, level + 1);
-    printHuffmanTree(node->right, level + 1);
 }
 
-void JPEGDecoder::printHuffmanTrees()
+void JPEGDecoder::printAllHuffmanTreePaths()
 {
-    for (int i = 0; i < dcHuffmanTrees.size(); ++i)
+    std::cout << "DC Huffman Trees:" << std::endl;
+    for (auto &tree : dcHuffmanTrees)
     {
-        std::cout << "DC Huffman Tree " << i << "\n";
-        printHuffmanTree(dcHuffmanTrees[i]);
+        printHuffmanTreePaths(tree, "");
     }
-    for (int i = 0; i < acHuffmanTrees.size(); ++i)
+
+    std::cout << "\nAC Huffman Trees:" << std::endl;
+    for (auto &tree : acHuffmanTrees)
     {
-        std::cout << "AC Huffman Tree " << i << "\n";
-        printHuffmanTree(acHuffmanTrees[i]);
+        printHuffmanTreePaths(tree, "");
     }
 }
 
