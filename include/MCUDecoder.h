@@ -13,7 +13,7 @@ class MCUDecoder
 {
 public:
     MCUDecoder(const std::vector<uint8_t> &compressedData, FrameParameter &frameParam,
-               const ScanParameter &scanParam, const std::vector<QuantizationTable> &quantizationTables,
+               ScanParameter &scanParam, const std::vector<QuantizationTable> &quantizationTables,
                const std::vector<std::shared_ptr<HuffmanNode>> &dcHuffmanTrees,
                const std::vector<std::shared_ptr<HuffmanNode>> &acHuffmanTrees);
 

@@ -44,7 +44,7 @@ uint8_t ScanParameter::getNumComponents()
     return numComponents;
 }
 
-std::vector<ScanComponent> ScanParameter::getComponents()
+std::vector<ScanComponent> &ScanParameter::getComponents()
 {
     return components;
 }

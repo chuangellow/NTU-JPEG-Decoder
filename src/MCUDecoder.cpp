@@ -1,7 +1,7 @@
 #include "MCUDecoder.h"
 
 MCUDecoder::MCUDecoder(const std::vector<uint8_t> &compressedData, FrameParameter &frameParam,
-                       const ScanParameter &scanParam, const std::vector<QuantizationTable> &quantizationTables,
+                       ScanParameter &scanParam, const std::vector<QuantizationTable> &quantizationTables,
                        const std::vector<std::shared_ptr<HuffmanNode>> &dcHuffmanTrees,
                        const std::vector<std::shared_ptr<HuffmanNode>> &acHuffmanTrees)
     : compressedData(compressedData), dataPos(0), bitBuffer(0), bitCount(0), frameParam(frameParam),
@@ -42,7 +42,8 @@ bool MCUDecoder::decodeMCU()
 
 ScanComponent *MCUDecoder::findScanComponent(uint8_t componentID)
 {
-    for (auto &scanComponent : scanParam.getComponents())
+    auto &components = scanParam.getComponents();
+    for (auto &scanComponent : components)
     {
         if (scanComponent.getComponentID() == componentID)
         {
@@ -54,8 +55,8 @@ ScanComponent *MCUDecoder::findScanComponent(uint8_t componentID)
 
 bool MCUDecoder::decodeBlock(ScanComponent &component)
 {
-    int dcTableID = component.getDCTableID();
-    int acTableID = component.getACTableID();
+    int dcTableID = (int)component.getDCTableID();
+    int acTableID = (int)component.getACTableID();
 
     auto &dcTree = dcHuffmanTrees[dcTableID];
     auto &acTree = acHuffmanTrees[acTableID];
@@ -123,6 +124,11 @@ int MCUDecoder::readAmplitude(int size)
 int MCUDecoder::decodeSymbol(const std::shared_ptr<HuffmanNode> &tree)
 {
     auto node = tree;
+    if (node == nullptr)
+    {
+        std::cerr << "Huffman tree is null" << std::endl;
+        return -1;
+    }
     while (node && node->value == -1)
     {
         int bit = readBit();
