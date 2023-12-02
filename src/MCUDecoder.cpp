@@ -19,6 +19,7 @@ bool MCUDecoder::decodeMCU()
         int vSampling = (int)frameComponent.getVerticalSamplingFactor();
 
         ScanComponent *scanComponent = findScanComponent(frameComponent.getComponentID());
+        frameComponent.printComponentInfo();
         if (!scanComponent)
         {
             std::cerr << "Scan component not found for ID " << (int)frameComponent.getComponentID() << std::endl;
@@ -29,7 +30,7 @@ bool MCUDecoder::decodeMCU()
         {
             for (int h = 0; h < hSampling; ++h)
             {
-                if (!decodeBlock(*scanComponent))
+                if (!decodeBlock(*scanComponent, h, v))
                 {
                     std::cerr << "Failed to decode block (" << v << ", " << h << ") for component " << (int)frameComponent.getComponentID() << std::endl;
                     return false;
@@ -53,10 +54,10 @@ ScanComponent *MCUDecoder::findScanComponent(uint8_t componentID)
     return nullptr;
 }
 
-bool MCUDecoder::decodeBlock(ScanComponent &component)
+bool MCUDecoder::decodeBlock(ScanComponent &component, int mcuX, int mcuY)
 {
-    int dcTableID = (int)component.getDCTableID();
-    int acTableID = (int)component.getACTableID();
+    int dcTableID = component.getDCTableID();
+    int acTableID = component.getACTableID();
 
     auto &dcTree = dcHuffmanTrees[dcTableID];
     auto &acTree = acHuffmanTrees[acTableID];
@@ -72,12 +73,14 @@ bool MCUDecoder::decodeBlock(ScanComponent &component)
     dcCoefficient += previousDCCoefficient[componentID];
     previousDCCoefficient[componentID] = dcCoefficient;
 
-    std::vector<int> acCoefficients(63, 0);
-    for (int i = 0; i < 63; ++i)
+    std::vector<int> block(64, 0);
+    block[0] = dcCoefficient;
+
+    for (int i = 1; i < 64; ++i)
     {
         int symbol = decodeSymbol(acTree);
         if (symbol == 0)
-        {
+        { // EOB
             break;
         }
 
@@ -85,21 +88,43 @@ bool MCUDecoder::decodeBlock(ScanComponent &component)
         int size = symbol & 0xF;
 
         i += runLength;
-
-        if (i >= 63)
+        if (i >= 64)
         {
             std::cerr << "Run-length exceeds block size" << std::endl;
             return false;
         }
 
         int amplitude = readAmplitude(size);
-        acCoefficients[i] = amplitude;
+        block[i] = amplitude;
     }
 
-    // Process the coefficients (e.g., inverse quantization, inverse DCT, etc.)
-    // ...
-
+    // Store the block
+    storeBlock(componentID, mcuX, mcuY, block);
     return true;
+}
+
+void MCUDecoder::storeBlock(int componentId, int x, int y, const std::vector<int> &block)
+{
+    // Resize for component
+    if (decodedBlocks.size() <= componentId)
+    {
+        decodedBlocks.resize(componentId + 1);
+    }
+
+    // Resize for y-coordinate
+    if (decodedBlocks[componentId].size() <= y)
+    {
+        decodedBlocks[componentId].resize(y + 1);
+    }
+
+    // Resize for x-coordinate
+    if (decodedBlocks[componentId][y].size() <= x)
+    {
+        decodedBlocks[componentId][y].resize(x + 1);
+    }
+
+    // Store the block
+    decodedBlocks[componentId][y][x] = block;
 }
 
 int MCUDecoder::readAmplitude(int size)
@@ -139,6 +164,28 @@ int MCUDecoder::decodeSymbol(const std::shared_ptr<HuffmanNode> &tree)
         node = bit ? node->right : node->left;
     }
     return node ? node->value : -1;
+}
+
+void MCUDecoder::printDecodedBlocks() const
+{
+    for (size_t comp = 0; comp < decodedBlocks.size(); ++comp)
+    {
+        for (size_t y = 0; y < decodedBlocks[comp].size(); ++y)
+        {
+            for (size_t x = 0; x < decodedBlocks[comp][y].size(); ++x)
+            {
+                std::cout << "------ Component " << comp << " Block (" << x << ", " << y << ") ------\n";
+                const auto &block = decodedBlocks[comp][y][x];
+                for (int i = 0; i < 64; i++)
+                {
+                    if (i > 0 && i % 8 == 0)
+                        std::cout << "\n";
+                    std::cout << block[i] << " ";
+                }
+                std::cout << "\n";
+            }
+        }
+    }
 }
 
 int MCUDecoder::readBit()

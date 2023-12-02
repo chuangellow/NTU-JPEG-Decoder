@@ -225,6 +225,8 @@ bool JPEGDecoder::decodeHuffmanData()
                 std::cerr << "Failed to decode MCU at (" << x << ", " << y << ")" << std::endl;
                 return false;
             }
+            std::cout << "Decoded MCU at (" << x << ", " << y << ")" << std::endl;
+            mcuDecoder.printDecodedBlocks();
         }
     }
     return true;

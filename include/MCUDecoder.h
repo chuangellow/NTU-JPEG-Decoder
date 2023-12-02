@@ -18,10 +18,11 @@ public:
                const std::vector<std::shared_ptr<HuffmanNode>> &acHuffmanTrees);
 
     bool decodeMCU();
-    bool decodeBlock(ScanComponent &component);
+    bool decodeBlock(ScanComponent &component, int mcuX, int mcuY);
     int decodeSymbol(const std::shared_ptr<HuffmanNode> &tree);
     ScanComponent *findScanComponent(uint8_t componentID);
     int readAmplitude(int size);
+    void printDecodedBlocks() const;
 
 private:
     const std::vector<uint8_t> &compressedData;
@@ -34,6 +35,8 @@ private:
     std::vector<std::shared_ptr<HuffmanNode>> dcHuffmanTrees;
     std::vector<std::shared_ptr<HuffmanNode>> acHuffmanTrees;
     std::vector<int> previousDCCoefficient;
+    std::vector<std::vector<std::vector<std::vector<int>>>> decodedBlocks;
+    void storeBlock(int componentId, int x, int y, const std::vector<int> &block);
     int readBit();
     int readBits(int size);
 };
