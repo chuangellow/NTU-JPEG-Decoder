@@ -126,15 +126,82 @@ bool JPEGDecoder::parseMarkers()
             break;
         }
     }
-    for (auto huffmanTable : huffmanTables)
-    {
-        huffmanTable.printTable();
-    }
     return true;
+}
+
+void JPEGDecoder::buildHuffmanTrees()
+{
+    for (const auto &table : huffmanTables)
+    {
+        auto tree = HuffmanTable::buildHuffmanTree(table);
+        if (table.getTableClass() == 0)
+        {
+            dcHuffmanTrees.push_back(tree);
+        }
+        else
+        {
+            acHuffmanTrees.push_back(tree);
+        }
+    }
+}
+
+void JPEGDecoder::printHuffmanTree(const std::shared_ptr<HuffmanNode> &node, int level)
+{
+    if (!node)
+    {
+        return;
+    }
+    for (int i = 0; i < level; ++i)
+    {
+        std::cout << "  ";
+    }
+
+    if (node->value != -1)
+    {
+        std::cout << "Value: " << node->value << "\n";
+    }
+    else
+    {
+        std::cout << "Node\n";
+    }
+    printHuffmanTree(node->left, level + 1);
+    printHuffmanTree(node->right, level + 1);
+}
+
+void JPEGDecoder::printHuffmanTrees()
+{
+    for (int i = 0; i < dcHuffmanTrees.size(); ++i)
+    {
+        std::cout << "DC Huffman Tree " << i << "\n";
+        printHuffmanTree(dcHuffmanTrees[i]);
+    }
+    for (int i = 0; i < acHuffmanTrees.size(); ++i)
+    {
+        std::cout << "AC Huffman Tree " << i << "\n";
+        printHuffmanTree(acHuffmanTrees[i]);
+    }
+}
+
+int JPEGDecoder::decodeSymbol(BitReader &reader, const std::shared_ptr<HuffmanNode> &tree)
+{
+    auto node = tree;
+    while (node && node->value == -1)
+    {
+        if (reader.readBit() == 0)
+        {
+            node = node->left;
+        }
+        else
+        {
+            node = node->right;
+        }
+    }
+    return node ? node->value : -1;
 }
 
 bool JPEGDecoder::decodeHuffmanData()
 {
+    buildHuffmanTrees();
     return true;
 }
 

@@ -42,18 +42,17 @@ uint8_t HuffmanTable::getCodeLength(uint8_t symbol) const
 std::shared_ptr<HuffmanNode> HuffmanTable::buildHuffmanTree(const HuffmanTable &table)
 {
     auto root = std::make_shared<HuffmanNode>();
+    int code = 0;
+    size_t symbolIndex = 0;
 
-    for (size_t len = 0; len < 16; ++len)
-    { // Iterate over each code length
-        for (size_t i = 0; i < table.codeLengths[len]; ++i)
+    for (size_t len = 1; len <= 16; ++len)
+    {
+        for (size_t i = 0; i < table.codeLengths[len - 1]; ++i)
         {
             auto current = root;
-            int codeLength = len + 1;
-            uint8_t symbol = table.symbols[i];
-
-            for (int j = codeLength - 1; j >= 0; --j)
+            for (int j = len - 1; j >= 0; --j)
             {
-                bool bit = (symbol >> j) & 1;
+                bool bit = (code >> j) & 1;
                 if (bit)
                 {
                     if (!current->right)
@@ -67,9 +66,15 @@ std::shared_ptr<HuffmanNode> HuffmanTable::buildHuffmanTree(const HuffmanTable &
                     current = current->left;
                 }
             }
-            current->value = symbol;
+            if (symbolIndex < table.symbols.size())
+            {
+                current->value = table.symbols[symbolIndex++];
+            }
+            code++;
         }
+        code <<= 1;
     }
+
     return root;
 }
 
