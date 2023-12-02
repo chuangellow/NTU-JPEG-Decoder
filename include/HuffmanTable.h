@@ -1,6 +1,7 @@
 #ifndef HUFFMANTABLE_H
 #define HUFFMANTABLE_H
 
+#include <iostream>
 #include <vector>
 #include <cstdint>
 
@@ -12,6 +13,7 @@ public:
     uint8_t getTableClass() const;
     uint8_t getTableID() const;
     uint8_t getCodeLength(uint8_t symbol) const;
+    void printTable();
 
 private:
     uint8_t tableClass; // 0 = DC, 1 = AC

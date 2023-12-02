@@ -23,3 +23,16 @@ uint16_t QuantizationTable::getValue(int index) const {
     }
     return 0;
 }
+
+void QuantizationTable::printTable() {
+    std::cout << "Table ID: " << (int)tableID << std::endl;
+    std::cout << "Precision: " << (int)precision << std::endl;
+    std::cout << "Values: " << std::endl;
+    for (int i = 0; i < values.size(); i++) {
+        std::cout << (int)values[i] << " ";
+        if ((i + 1) % 8 == 0) {
+            std::cout << std::endl;
+        }
+    }
+    std::cout << std::endl;
+}

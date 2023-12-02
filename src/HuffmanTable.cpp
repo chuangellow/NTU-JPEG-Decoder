@@ -30,3 +30,20 @@ uint8_t HuffmanTable::getTableID() const {
 uint8_t HuffmanTable::getCodeLength(uint8_t symbol) const {
     return codeLengths[symbol];
 }
+
+void HuffmanTable::printTable() {
+    std::cout << "Table ID: " << (int)tableID << std::endl;
+    std::cout << "Table Class: " << (int)tableClass << std::endl;
+    std::cout << "Code Lengths: ";
+    for (int i = 0; i < 16; ++i) {
+        std::cout << (int)codeLengths[i] << " ";
+    }
+    std::cout << std::endl;
+    std::vector<uint8_t> symbols = getSymbols();
+    std::cout << "Symbols: ";
+    for (auto symbol : symbols) {
+        std::cout << (int)symbol << " ";
+    }
+    std::cout << std::endl;
+    return;
+}

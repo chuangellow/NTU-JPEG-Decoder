@@ -102,6 +102,9 @@ bool JPEGDecoder::parseMarkers() {
                 break;
         }
     }
+    for (auto huffmanTable : huffmanTables) {
+        huffmanTable.printTable();
+    }
     return true;
 }
 
