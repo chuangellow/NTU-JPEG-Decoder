@@ -488,9 +488,9 @@ bool JPEGDecoder::convertColorSpace()
 
 Color JPEGDecoder::convertYCbCrToRGB(double Y, double Cb, double Cr)
 {
-    double R = Y + 1.402 * (Cr - 128);
-    double G = Y - 0.344136 * (Cb - 128) - 0.714136 * (Cr - 128);
-    double B = Y + 1.772 * (Cb - 128);
+    double R = Y + 1.402 * Cr + 128;
+    double G = Y - 0.344136 * Cb - 0.714136 * Cr + 128;
+    double B = Y + 1.772 * Cb + 128;
 
     R = std::min(std::max(0.0, R), 255.0);
     G = std::min(std::max(0.0, G), 255.0);
