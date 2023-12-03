@@ -13,7 +13,7 @@ MCUDecoder::MCUDecoder(const std::vector<uint8_t> &compressedData, FrameParamete
 
 bool MCUDecoder::decodeMCU()
 {
-    std::cout << "dataPos: " << dataPos << std::endl;
+    currentMCU = MCU();
     for (auto &frameComponent : frameParam.getComponents())
     {
         int hSampling = (int)frameComponent.getHorizontalSamplingFactor();
@@ -151,24 +151,22 @@ int MCUDecoder::extend(int additionalBits, int size)
     return additionalBits - maxValue;
 }
 
-void MCUDecoder::storeBlock(int componentId, int x, int y, const std::vector<int> &block)
+void MCUDecoder::storeBlock(int componentId, int x, int y, const std::vector<int> &blockData)
 {
-    if (decodedBlocks.size() <= componentId)
+    Block block;
+    block.data = blockData;
+    if (componentId == 0)
     {
-        decodedBlocks.resize(componentId + 1);
+        currentMCU.YBlocks.push_back(Block{block});
     }
-
-    if (decodedBlocks[componentId].size() <= y)
+    else if (componentId == 1)
     {
-        decodedBlocks[componentId].resize(y + 1);
+        currentMCU.CbBlocks.push_back(Block{block});
     }
-
-    if (decodedBlocks[componentId][y].size() <= x)
+    else if (componentId == 2)
     {
-        decodedBlocks[componentId][y].resize(x + 1);
+        currentMCU.CrBlocks.push_back(Block{block});
     }
-
-    decodedBlocks[componentId][y][x] = block;
 }
 
 int MCUDecoder::decodeSymbol(const std::shared_ptr<HuffmanNode> &tree)

@@ -19,6 +19,7 @@ public:
     ~JPEGDecoder();
 
     bool decode(const std::string &inputFilePath, const std::string &outputFilePath);
+    std::vector<MCU> mcus;
 
 private:
     BitReader *bitReader;
@@ -38,6 +39,8 @@ private:
     void printHuffmanTreePaths(const std::shared_ptr<HuffmanNode> &node, const std::string &path);
     void printAllHuffmanTreePaths();
     bool decodeScanData();
+    const std::vector<MCU> &getDecodedMCUs() const { return mcus; }
+    void printDecodedMCUs() const;
     bool performIDCT();
     bool convertColorSpace();
     bool writeBMPFile(const std::string &filePath);

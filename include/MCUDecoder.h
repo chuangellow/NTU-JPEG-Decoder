@@ -9,6 +9,19 @@
 #include <vector>
 #include <memory>
 
+struct Block
+{
+    std::vector<int> data;
+    Block() : data(64, 0) {}
+};
+
+struct MCU
+{
+    std::vector<Block> YBlocks;
+    std::vector<Block> CbBlocks;
+    std::vector<Block> CrBlocks;
+};
+
 class MCUDecoder
 {
 public:
@@ -26,6 +39,8 @@ public:
     ScanComponent *findScanComponent(uint8_t componentID);
     int extend(int additionalBits, int size);
     void printDecodedBlocks() const;
+    MCU currentMCU;
+    MCU &getDecodedMCU() { return currentMCU; }
 
 private:
     const std::vector<uint8_t> &compressedData;

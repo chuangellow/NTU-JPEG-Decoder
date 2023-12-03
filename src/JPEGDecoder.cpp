@@ -227,11 +227,46 @@ bool JPEGDecoder::decodeScanData()
                 std::cerr << "Failed to decode MCU at (" << y << ", " << x << ")" << std::endl;
                 return false;
             }
-            std::cout << "------ MCU (" << y << ", " << x << ") ------\n";
-            mcuDecoder.printDecodedBlocks();
+            mcus.push_back(mcuDecoder.getDecodedMCU());
         }
     }
+    printDecodedMCUs();
     return true;
+}
+
+void JPEGDecoder::printDecodedMCUs() const
+{
+    for (size_t i = 0; i < mcus.size(); ++i)
+    {
+        std::cout << "MCU " << i << std::endl;
+        for (size_t j = 0; j < mcus[i].YBlocks.size(); ++j)
+        {
+            std::cout << "Y Block " << j << std::endl;
+            for (size_t k = 0; k < mcus[i].YBlocks[j].data.size(); ++k)
+            {
+                std::cout << mcus[i].YBlocks[j].data[k] << (k % 8 == 7 ? "\n" : " ");
+            }
+            std::cout << std::endl;
+        }
+        for (size_t j = 0; j < mcus[i].CbBlocks.size(); ++j)
+        {
+            std::cout << "Cb Block " << j << std::endl;
+            for (size_t k = 0; k < mcus[i].CbBlocks[j].data.size(); ++k)
+            {
+                std::cout << mcus[i].CbBlocks[j].data[k] << (k % 8 == 7 ? "\n" : " ");
+            }
+            std::cout << std::endl;
+        }
+        for (size_t j = 0; j < mcus[i].CrBlocks.size(); ++j)
+        {
+            std::cout << "Cr Block " << j << std::endl;
+            for (size_t k = 0; k < mcus[i].CrBlocks[j].data.size(); ++k)
+            {
+                std::cout << mcus[i].CrBlocks[j].data[k] << (k % 8 == 7 ? "\n" : " ");
+            }
+            std::cout << std::endl;
+        }
+    }
 }
 
 bool JPEGDecoder::performIDCT()
