@@ -483,32 +483,42 @@ bool JPEGDecoder::convertColorSpace()
     rgbData.clear();
     rgbData.resize(frameParameter.getWidth() * frameParameter.getHeight());
 
-    int mcuCountX = (frameParameter.getWidth() - 1) / (8 * frameParameter.getMaxHorizontalSampling()) + 1;
-    int mcuCountY = (frameParameter.getHeight() - 1) / (8 * frameParameter.getMaxVerticalSampling()) + 1;
+    FrameComponent YComponent = getComponentByID(1);
+    FrameComponent CbComponent = getComponentByID(2);
+    FrameComponent CrComponent = getComponentByID(3);
 
-    for (size_t mcuY = 0; mcuY < mcuCountY; ++mcuY)
+    int maxH = frameParameter.getMaxHorizontalSampling();
+    int maxV = frameParameter.getMaxVerticalSampling();
+
+    int mcuCountX = (frameParameter.getWidth() - 1) / (8 * maxH) + 1;
+    int mcuCountY = (frameParameter.getHeight() - 1) / (8 * maxV) + 1;
+
+    for (int mcuY = 0; mcuY < mcuCountY; ++mcuY)
     {
-        for (size_t mcuX = 0; mcuX < mcuCountX; ++mcuX)
+        for (int mcuX = 0; mcuX < mcuCountX; ++mcuX)
         {
             MCU &mcu = mcus[mcuY * mcuCountX + mcuX];
 
-            for (int blockY = 0; blockY < 8; ++blockY)
+            for (int y = 0; y < 8 * maxV; ++y)
             {
-                for (int blockX = 0; blockX < 8; ++blockX)
+                for (int x = 0; x < 8 * maxH; ++x)
                 {
-                    int pixelX = mcuX * 8 + blockX;
-                    int pixelY = mcuY * 8 + blockY;
+                    int pixelX = mcuX * 8 * maxH + x;
+                    int pixelY = mcuY * 8 * maxV + y;
 
                     if (pixelX >= frameParameter.getWidth() || pixelY >= frameParameter.getHeight())
-                    {
                         continue;
-                    }
 
-                    double Y = mcu.YBlocks[0].data[blockY * 8 + blockX];
-                    double Cb = mcu.fullResCbBlocks[0].data[blockY * 8 + blockX];
-                    double Cr = mcu.fullResCrBlocks[0].data[blockY * 8 + blockX];
+                    int YIndex = y * YComponent.getVerticalSamplingFactor() / maxV * 8 + x * YComponent.getHorizontalSamplingFactor() / maxH;
+                    int CbIndex = y * CbComponent.getVerticalSamplingFactor() / maxV * 8 + x * CbComponent.getHorizontalSamplingFactor() / maxH;
+                    int CrIndex = y * CrComponent.getVerticalSamplingFactor() / maxV * 8 + x * CrComponent.getHorizontalSamplingFactor() / maxH;
+
+                    double Y = mcu.YBlocks[YIndex / 64].data[YIndex % 64];
+                    double Cb = mcu.fullResCbBlocks[CbIndex / 64].data[CbIndex];
+                    double Cr = mcu.fullResCrBlocks[CrIndex / 64].data[CrIndex];
 
                     Color rgb = convertYCbCrToRGB(Y, Cb, Cr);
+
                     rgbData[pixelY * frameParameter.getWidth() + pixelX] = rgb;
                 }
             }
