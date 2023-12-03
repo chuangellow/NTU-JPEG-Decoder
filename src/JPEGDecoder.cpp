@@ -24,9 +24,15 @@ bool JPEGDecoder::decode(const std::string &inputFilePath, const std::string &ou
         return false;
     }
 
-    if (!decodeScanData())
+    if (!decodeHuffmanData())
     {
         std::cerr << "Failed to decode data" << std::endl;
+        return false;
+    }
+
+    if (!performDequantization())
+    {
+        std::cerr << "Failed to perform dequantization" << std::endl;
         return false;
     }
 
@@ -207,7 +213,7 @@ void JPEGDecoder::printAllHuffmanTreePaths()
     }
 }
 
-bool JPEGDecoder::decodeScanData()
+bool JPEGDecoder::decodeHuffmanData()
 {
     buildHuffmanTrees();
 
@@ -277,6 +283,36 @@ void JPEGDecoder::printBlock(const Block &block) const
         std::cout << block.data[i] << " ";
     }
     std::cout << "\n";
+}
+
+bool JPEGDecoder::performDequantization()
+{
+    for (MCU &mcu : mcus)
+    {
+        for (Block &block : mcu.YBlocks)
+        {
+            dequantizeBlock(block, quantizationTables[frameParameter.getComponents()[0].getQuantizationTableID()]);
+        }
+        for (Block &block : mcu.CbBlocks)
+        {
+            dequantizeBlock(block, quantizationTables[frameParameter.getComponents()[1].getQuantizationTableID()]);
+        }
+        for (Block &block : mcu.CrBlocks)
+        {
+            dequantizeBlock(block, quantizationTables[frameParameter.getComponents()[2].getQuantizationTableID()]);
+        }
+    }
+    std::cout << "After dequantization:" << std::endl;
+    printDecodedMCU(0, 0, (frameParameter.getWidth() - 1) / (8 * frameParameter.getMaxHorizontalSampling()) + 1);
+    return true;
+}
+
+void JPEGDecoder::dequantizeBlock(Block &block, const QuantizationTable &qTable)
+{
+    for (int i = 0; i < 64; ++i)
+    {
+        block.data[i] *= qTable.getValue(i);
+    }
 }
 
 bool JPEGDecoder::performIDCT()

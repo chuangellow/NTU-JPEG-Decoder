@@ -38,10 +38,12 @@ private:
     void buildHuffmanTrees();
     void printHuffmanTreePaths(const std::shared_ptr<HuffmanNode> &node, const std::string &path);
     void printAllHuffmanTreePaths();
-    bool decodeScanData();
+    bool decodeHuffmanData();
     const std::vector<MCU> &getDecodedMCUs() const { return mcus; }
     void printDecodedMCU(int mcuX, int mcuY, int mcuCountX) const;
     void printBlock(const Block &block) const;
+    bool performDequantization();
+    void dequantizeBlock(Block &block, const QuantizationTable &qTable);
     bool performIDCT();
     bool convertColorSpace();
     bool writeBMPFile(const std::string &filePath);
