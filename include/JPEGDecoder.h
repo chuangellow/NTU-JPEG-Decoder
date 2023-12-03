@@ -68,7 +68,9 @@ private:
     bool performIDCT();
     void applyIDCT(Block &block);
     bool performInverseSubsampling();
-    std::vector<Block> upsampleComponents(const std::vector<Block> &components);
+    FrameComponent getComponentByID(uint8_t componentID);
+    std::vector<Block> upsampleComponents(const std::vector<Block> &components, uint16_t H_Ratio, uint16_t V_Ratio);
+    Block upsampleBlock(const Block &block, uint16_t H_Ratio, uint16_t V_Ratio);
     Block upsampleBlock(const Block &block);
     Color convertYCbCrToRGB(double Y, double Cb, double Cr);
     bool convertColorSpace();

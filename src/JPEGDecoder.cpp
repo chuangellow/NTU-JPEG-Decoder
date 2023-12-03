@@ -407,40 +407,71 @@ void JPEGDecoder::applyIDCT(Block &block)
 
 bool JPEGDecoder::performInverseSubsampling()
 {
+    FrameComponent YComponent = getComponentByID(1);
+    FrameComponent CbComponent = getComponentByID(2);
+    FrameComponent CrComponent = getComponentByID(3);
+
+    uint16_t maxH = YComponent.getHorizontalSamplingFactor();
+    uint16_t maxV = YComponent.getVerticalSamplingFactor();
+
+    uint16_t CbH_Ratio = maxH / CbComponent.getHorizontalSamplingFactor();
+    uint16_t CbV_Ratio = maxV / CbComponent.getVerticalSamplingFactor();
+    uint16_t CrH_Ratio = maxH / CrComponent.getHorizontalSamplingFactor();
+    uint16_t CrV_Ratio = maxV / CrComponent.getVerticalSamplingFactor();
     for (MCU &mcu : mcus)
     {
-        mcu.fullResCbBlocks = upsampleComponents(mcu.CbBlocks);
-        mcu.fullResCrBlocks = upsampleComponents(mcu.CrBlocks);
+        mcu.fullResCbBlocks = upsampleComponents(mcu.CbBlocks, CbH_Ratio, CbV_Ratio);
+        mcu.fullResCrBlocks = upsampleComponents(mcu.CrBlocks, CrH_Ratio, CrV_Ratio);
     }
     std::cout << "After inverse subsampling:" << std::endl;
     return true;
 }
 
-std::vector<Block> JPEGDecoder::upsampleComponents(const std::vector<Block> &components)
+FrameComponent JPEGDecoder::getComponentByID(uint8_t componentID)
+{
+    for (FrameComponent &component : frameParameter.getComponents())
+    {
+        if (component.getComponentID() == componentID)
+        {
+            return component;
+        }
+    }
+    std::cerr << "Component with ID " << componentID << " not found" << std::endl;
+}
+
+std::vector<Block> JPEGDecoder::upsampleComponents(const std::vector<Block> &components, uint16_t H_Ratio, uint16_t V_Ratio)
 {
     std::vector<Block> upsampledComponents;
 
     for (const Block &block : components)
     {
-        upsampledComponents.push_back(upsampleBlock(block));
+        upsampledComponents.push_back(upsampleBlock(block, H_Ratio, V_Ratio));
     }
 
     return upsampledComponents;
 }
 
-Block JPEGDecoder::upsampleBlock(const Block &block)
+Block JPEGDecoder::upsampleBlock(const Block &block, uint16_t H_Ratio, uint16_t V_Ratio)
 {
+    int newWidth = 8 * H_Ratio;
+    int newHeight = 8 * V_Ratio;
     Block upsampledBlock;
+    upsampledBlock.data.resize(newWidth * newHeight, 0);
 
-    for (int y = 0; y < 8; y += 2)
+    for (int y = 0; y < 8; ++y)
     {
-        for (int x = 0; x < 8; x += 2)
+        for (int x = 0; x < 8; ++x)
         {
-            double sample = block.data[(y / 2) * 4 + (x / 2)];
-            upsampledBlock.data[y * 8 + x] = sample;
-            upsampledBlock.data[y * 8 + (x + 1)] = sample;
-            upsampledBlock.data[(y + 1) * 8 + x] = sample;
-            upsampledBlock.data[(y + 1) * 8 + (x + 1)] = sample;
+            double value = block.data[y * 8 + x];
+            for (int dy = 0; dy < V_Ratio; ++dy)
+            {
+                for (int dx = 0; dx < H_Ratio; ++dx)
+                {
+                    int newX = x * H_Ratio + dx;
+                    int newY = y * V_Ratio + dy;
+                    upsampledBlock.data[newY * newWidth + newX] = value;
+                }
+            }
         }
     }
 
