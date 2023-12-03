@@ -411,8 +411,8 @@ bool JPEGDecoder::performInverseSubsampling()
     FrameComponent CbComponent = getComponentByID(2);
     FrameComponent CrComponent = getComponentByID(3);
 
-    uint16_t maxH = YComponent.getHorizontalSamplingFactor();
-    uint16_t maxV = YComponent.getVerticalSamplingFactor();
+    uint16_t maxH = frameParameter.getMaxHorizontalSampling();
+    uint16_t maxV = frameParameter.getMaxVerticalSampling();
 
     uint16_t CbH_Ratio = maxH / CbComponent.getHorizontalSamplingFactor();
     uint16_t CbV_Ratio = maxV / CbComponent.getVerticalSamplingFactor();
@@ -487,8 +487,8 @@ bool JPEGDecoder::convertColorSpace()
     FrameComponent CbComponent = getComponentByID(2);
     FrameComponent CrComponent = getComponentByID(3);
 
-    int maxH = frameParameter.getMaxHorizontalSampling();
-    int maxV = frameParameter.getMaxVerticalSampling();
+    int maxH = (int)frameParameter.getMaxHorizontalSampling();
+    int maxV = (int)frameParameter.getMaxVerticalSampling();
 
     int mcuCountX = (frameParameter.getWidth() - 1) / (8 * maxH) + 1;
     int mcuCountY = (frameParameter.getHeight() - 1) / (8 * maxV) + 1;
@@ -506,16 +506,16 @@ bool JPEGDecoder::convertColorSpace()
                     int pixelX = mcuX * 8 * maxH + x;
                     int pixelY = mcuY * 8 * maxV + y;
 
-                    if (pixelX >= frameParameter.getWidth() || pixelY >= frameParameter.getHeight())
-                        continue;
+                    std::cout << "y * 8 * maxH" << y * 8 * maxH << std::endl;
+                    int YIndex = y * 8 * maxH + x;
+                    int CbIndex = y * 8 * maxH + x;
+                    int CrIndex = y * 8 * maxH + x;
 
-                    int YIndex = y * YComponent.getVerticalSamplingFactor() / maxV * 8 + x * YComponent.getHorizontalSamplingFactor() / maxH;
-                    int CbIndex = y * CbComponent.getVerticalSamplingFactor() / maxV * 8 + x * CbComponent.getHorizontalSamplingFactor() / maxH;
-                    int CrIndex = y * CrComponent.getVerticalSamplingFactor() / maxV * 8 + x * CrComponent.getHorizontalSamplingFactor() / maxH;
+                    std::cout << "YIndex:" << YIndex << " CbIndex:" << CbIndex << " CrIndex:" << CrIndex << std::endl;
 
                     double Y = mcu.YBlocks[YIndex / 64].data[YIndex % 64];
-                    double Cb = mcu.fullResCbBlocks[CbIndex / 64].data[CbIndex];
-                    double Cr = mcu.fullResCrBlocks[CrIndex / 64].data[CrIndex];
+                    double Cb = mcu.fullResCbBlocks[0].data[CbIndex];
+                    double Cr = mcu.fullResCrBlocks[0].data[CrIndex];
 
                     Color rgb = convertYCbCrToRGB(Y, Cb, Cr);
 
