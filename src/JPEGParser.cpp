@@ -138,7 +138,6 @@ std::vector<uint8_t> JPEGParser::parseScanData()
             uint8_t nextByteData = bitReader.readByte();
             if (nextByteData == JPEG_DATA)
             {
-                scanData.push_back(byteData);
                 byteData = bitReader.readByte();
             }
             else if (nextByteData == JPEG_EOI)

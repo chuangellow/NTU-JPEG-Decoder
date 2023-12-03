@@ -13,6 +13,7 @@ MCUDecoder::MCUDecoder(const std::vector<uint8_t> &compressedData, FrameParamete
 
 bool MCUDecoder::decodeMCU()
 {
+    std::cout << "dataPos: " << dataPos << std::endl;
     for (auto &frameComponent : frameParam.getComponents())
     {
         int hSampling = (int)frameComponent.getHorizontalSamplingFactor();
@@ -152,7 +153,7 @@ int MCUDecoder::extend(int additionalBits, int size)
     {
         return additionalBits;
     }
-    return additionalBits - maxValue - 1;
+    return additionalBits - maxValue;
 }
 
 void MCUDecoder::storeBlock(int componentId, int x, int y, const std::vector<int> &block)
