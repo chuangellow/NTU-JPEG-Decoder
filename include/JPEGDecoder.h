@@ -40,7 +40,8 @@ private:
     void printAllHuffmanTreePaths();
     bool decodeScanData();
     const std::vector<MCU> &getDecodedMCUs() const { return mcus; }
-    void printDecodedMCUs() const;
+    void printDecodedMCU(int mcuX, int mcuY, int mcuCountX) const;
+    void printBlock(const Block &block) const;
     bool performIDCT();
     bool convertColorSpace();
     bool writeBMPFile(const std::string &filePath);

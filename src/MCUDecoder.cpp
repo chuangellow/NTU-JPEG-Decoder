@@ -155,15 +155,15 @@ void MCUDecoder::storeBlock(int componentId, int x, int y, const std::vector<int
 {
     Block block;
     block.data = blockData;
-    if (componentId == 0)
+    if (componentId == 1)
     {
         currentMCU.YBlocks.push_back(Block{block});
     }
-    else if (componentId == 1)
+    else if (componentId == 2)
     {
         currentMCU.CbBlocks.push_back(Block{block});
     }
-    else if (componentId == 2)
+    else if (componentId == 3)
     {
         currentMCU.CrBlocks.push_back(Block{block});
     }
