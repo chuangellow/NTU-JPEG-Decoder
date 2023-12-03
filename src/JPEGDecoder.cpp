@@ -515,13 +515,24 @@ bool JPEGDecoder::convertColorSpace()
                     int pixelX = mcuX * 8 * maxH + x;
                     int pixelY = mcuY * 8 * maxV + y;
 
-                    int YIndex = y * 8 * maxH + x;
-                    int CbIndex = y * 8 * maxH + x;
-                    int CrIndex = y * 8 * maxH + x;
+                    if (pixelX >= frameParameter.getWidth() || pixelY >= frameParameter.getHeight())
+                        continue;
 
-                    double Y = mcu.YBlocks[YIndex / 64].data[YIndex % 64];
-                    double Cb = mcu.fullResCbBlocks[0].data[CbIndex];
-                    double Cr = mcu.fullResCrBlocks[0].data[CrIndex];
+                    int newY = y * YComponent.getVerticalSamplingFactor() / maxV;
+                    int newX = x * YComponent.getHorizontalSamplingFactor() / maxH;
+                    int newCbY = y * CbComponent.getVerticalSamplingFactor() / maxV;
+                    int newCbX = x * CbComponent.getHorizontalSamplingFactor() / maxH;
+                    int newCrY = y * CrComponent.getVerticalSamplingFactor() / maxV;
+                    int newCrX = x * CrComponent.getHorizontalSamplingFactor() / maxH;
+
+                    int YBlockIndex = (newY / 8) * maxH + (newX / 8);
+                    int YPixelIndex = (newY % 8) * 8 + (newX % 8);
+                    int CbPixelIndex = newCbY * 8 * maxH + newCbX;
+                    int CrPixelIndex = newCrY * 8 * maxH + newCrX;
+
+                    double Y = mcu.YBlocks[YBlockIndex].data[YPixelIndex];
+                    double Cb = mcu.fullResCbBlocks[0].data[CbPixelIndex];
+                    double Cr = mcu.fullResCrBlocks[0].data[CrPixelIndex];
 
                     Color rgb = convertYCbCrToRGB(Y, Cb, Cr);
 
