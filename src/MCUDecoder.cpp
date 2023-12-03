@@ -65,6 +65,7 @@ bool MCUDecoder::decodeBlock(ScanComponent &component, int mcuX, int mcuY)
     int dcCoefficient = decodeDC(dcTree, component.getComponentID());
     if (dcCoefficient == -1)
     {
+        std::cerr << "dataPos: " << dataPos << std::endl;
         std::cerr << "Failed to decode DC coefficient" << std::endl;
         return false;
     }
@@ -189,6 +190,7 @@ int MCUDecoder::decodeSymbol(const std::shared_ptr<HuffmanNode> &tree)
         int bit = readBit();
         if (bit == -1)
         {
+            std::cerr << "Error reading bit" << std::endl;
             return -1;
         }
         node = bit ? node->right : node->left;
@@ -204,7 +206,7 @@ void MCUDecoder::printDecodedBlocks() const
         {
             for (size_t x = 0; x < decodedBlocks[comp][y].size(); ++x)
             {
-                std::cout << "------ Component " << comp << " Block (" << x << ", " << y << ") ------\n";
+                std::cout << "------ Component " << comp << " Block (" << y << ", " << x << ") ------\n";
                 const auto &block = decodedBlocks[comp][y][x];
                 for (int i = 0; i < 64; i++)
                 {
@@ -222,15 +224,20 @@ int MCUDecoder::readBit()
 {
     if (bitCount == 0)
     {
-        if (dataPos < compressedData.size())
+        if (dataPos >= compressedData.size())
         {
-            bitBuffer = compressedData[dataPos++];
-            bitCount = 8;
-        }
-        else
-        {
+            std::cerr << "Error: No more data to read" << std::endl;
             return -1;
         }
+
+        bitBuffer = compressedData[dataPos++];
+
+        if (bitBuffer == 0xFF && dataPos < compressedData.size() && compressedData[dataPos] == 0x00)
+        {
+            dataPos++;
+        }
+
+        bitCount = 8;
     }
 
     int bit = (bitBuffer >> 7) & 1;

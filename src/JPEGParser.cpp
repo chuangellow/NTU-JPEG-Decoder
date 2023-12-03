@@ -130,19 +130,25 @@ std::vector<uint8_t> JPEGParser::parseScanData()
 {
     std::vector<uint8_t> scanData;
     uint8_t byteData = bitReader.readByte();
-    bool isEOI = true;
-    while (isEOI)
+    while (true)
     {
         if (byteData == JPEG_PREFIX)
         {
             uint8_t nextByteData = bitReader.readByte();
             if (nextByteData == JPEG_DATA)
             {
+                scanData.push_back(byteData);
+                scanData.push_back(nextByteData);
                 byteData = bitReader.readByte();
             }
             else if (nextByteData == JPEG_EOI)
             {
-                isEOI = false;
+                break;
+            }
+            else
+            {
+                std::cerr << "Invalid marker" << std::endl;
+                return std::vector<uint8_t>();
             }
         }
         else
