@@ -20,15 +20,31 @@ $ cd ./JPEG-Decoder
 $ mkdir build
 $ cd build
 $ cmake ..
-$ make
+$ make JPEGDecoder
 ```
 
-After a successful build, you should have the JPEGDecoder executable in the build directory.
+After a successful build, you should have the ```JPEGDecoder``` executable in the build directory.
 
-## Running the Decoder
+## Running the JPEGDecoder
 
 To decode a ```.jpg``` image to a ```.bmp``` image, use the following command:
 
 ```
 ./JPEGDecoder <input.jpg> <output.bmp>
+```
+
+## Debugging with JPEGDecoderDebug
+
+The JPEGDecoderDebug executable is built with debug messages enabled. It prints detailed information about the decoding process of MCU(0, 0) at every stage, which can be useful for development and debugging purposes.
+
+To build the debug version, run:
+
+```
+make JPEGDecoderDebug
+```
+
+Then, to run the debug version and see the debug messages, use:
+
+```
+./JPEGDecoderDebug <input.jpg> <output.bmp>
 ```
