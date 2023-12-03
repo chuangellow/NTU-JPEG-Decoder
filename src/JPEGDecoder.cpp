@@ -232,7 +232,9 @@ bool JPEGDecoder::decodeHuffmanData()
     int mcuCountX = (frameParameter.getWidth() - 1) / (8 * frameParameter.getMaxHorizontalSampling()) + 1;
     int mcuCountY = (frameParameter.getHeight() - 1) / (8 * frameParameter.getMaxVerticalSampling()) + 1;
 
+#if DEBUG
     std::cout << "MCU count: " << mcuCountX << " x " << mcuCountY << std::endl;
+#endif
 
     for (int y = 0; y < mcuCountY; ++y)
     {
@@ -246,7 +248,9 @@ bool JPEGDecoder::decodeHuffmanData()
             mcus.push_back(mcuDecoder.getDecodedMCU());
         }
     }
+#if DEBUG
     printDecodedMCU(0, 0, mcuCountX);
+#endif
     return true;
 }
 
@@ -266,27 +270,27 @@ void JPEGDecoder::printDecodedMCU(int mcuX, int mcuY, int mcuCountX) const
     for (size_t i = 0; i < mcu.YBlocks.size(); ++i)
     {
         std::cout << "------ Y: " << i << " ------\n";
-        printBlock(mcu.YBlocks[i]);
+        printBlock(mcu.YBlocks[i], 8);
     }
 
     for (size_t i = 0; i < mcu.CbBlocks.size(); ++i)
     {
         std::cout << "------ Cb: " << i << " ------\n";
-        printBlock(mcu.CbBlocks[i]);
+        printBlock(mcu.CbBlocks[i], 8);
     }
 
     for (size_t i = 0; i < mcu.CrBlocks.size(); ++i)
     {
         std::cout << "------ Cr: " << i << " ------\n";
-        printBlock(mcu.CrBlocks[i]);
+        printBlock(mcu.CrBlocks[i], 8);
     }
 }
 
-void JPEGDecoder::printBlock(const Block &block) const
+void JPEGDecoder::printBlock(const Block &block, int n) const
 {
-    for (int i = 0; i < 64; i++)
+    for (int i = 0; i < n * n; i++)
     {
-        if (i > 0 && i % 8 == 0)
+        if (i > 0 && i % n == 0)
         {
             std::cout << "\n";
         }
@@ -312,8 +316,10 @@ bool JPEGDecoder::performDequantization()
             dequantizeBlock(block, quantizationTables[frameParameter.getComponents()[2].getQuantizationTableID()]);
         }
     }
+#if DEBUG
     std::cout << "After dequantization:" << std::endl;
     printDecodedMCU(0, 0, (frameParameter.getWidth() - 1) / (8 * frameParameter.getMaxHorizontalSampling()) + 1);
+#endif
     return true;
 }
 
@@ -342,8 +348,10 @@ bool JPEGDecoder::performInverseZigZag()
             inverseZigZag(block);
         }
     }
+#if DEBUG
     std::cout << "After inverse Zig-Zag:" << std::endl;
     printDecodedMCU(0, 0, (frameParameter.getWidth() - 1) / (8 * frameParameter.getMaxHorizontalSampling()) + 1);
+#endif
     return true;
 }
 
@@ -374,8 +382,10 @@ bool JPEGDecoder::performIDCT()
             applyIDCT(block);
         }
     }
+#if DEBUG
     std::cout << "After IDCT:" << std::endl;
     printDecodedMCU(0, 0, (frameParameter.getWidth() - 1) / (8 * frameParameter.getMaxHorizontalSampling()) + 1);
+#endif
     return true;
 }
 
@@ -423,7 +433,6 @@ bool JPEGDecoder::performInverseSubsampling()
         mcu.fullResCbBlocks = upsampleComponents(mcu.CbBlocks, CbH_Ratio, CbV_Ratio);
         mcu.fullResCrBlocks = upsampleComponents(mcu.CrBlocks, CrH_Ratio, CrV_Ratio);
     }
-    std::cout << "After inverse subsampling:" << std::endl;
     return true;
 }
 
@@ -506,12 +515,9 @@ bool JPEGDecoder::convertColorSpace()
                     int pixelX = mcuX * 8 * maxH + x;
                     int pixelY = mcuY * 8 * maxV + y;
 
-                    std::cout << "y * 8 * maxH" << y * 8 * maxH << std::endl;
                     int YIndex = y * 8 * maxH + x;
                     int CbIndex = y * 8 * maxH + x;
                     int CrIndex = y * 8 * maxH + x;
-
-                    std::cout << "YIndex:" << YIndex << " CbIndex:" << CbIndex << " CrIndex:" << CrIndex << std::endl;
 
                     double Y = mcu.YBlocks[YIndex / 64].data[YIndex % 64];
                     double Cb = mcu.fullResCbBlocks[0].data[CbIndex];

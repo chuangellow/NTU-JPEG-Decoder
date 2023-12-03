@@ -60,7 +60,7 @@ private:
     bool decodeHuffmanData();
     const std::vector<MCU> &getDecodedMCUs() const { return mcus; }
     void printDecodedMCU(int mcuX, int mcuY, int mcuCountX) const;
-    void printBlock(const Block &block) const;
+    void printBlock(const Block &block, int n) const;
     bool performDequantization();
     void dequantizeBlock(Block &block, const QuantizationTable &qTable);
     bool performInverseZigZag();
