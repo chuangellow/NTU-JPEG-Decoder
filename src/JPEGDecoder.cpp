@@ -36,6 +36,12 @@ bool JPEGDecoder::decode(const std::string &inputFilePath, const std::string &ou
         return false;
     }
 
+    if (!performInverseZigZag())
+    {
+        std::cerr << "Failed to perform inverse zig-zag" << std::endl;
+        return false;
+    }
+
     if (!performIDCT())
     {
         std::cerr << "Failed to perform IDCT" << std::endl;
@@ -313,6 +319,38 @@ void JPEGDecoder::dequantizeBlock(Block &block, const QuantizationTable &qTable)
     {
         block.data[i] *= qTable.getValue(i);
     }
+}
+
+bool JPEGDecoder::performInverseZigZag()
+{
+    for (MCU &mcu : mcus)
+    {
+        for (Block &block : mcu.YBlocks)
+        {
+            inverseZigZag(block);
+        }
+        for (Block &block : mcu.CbBlocks)
+        {
+            inverseZigZag(block);
+        }
+        for (Block &block : mcu.CrBlocks)
+        {
+            inverseZigZag(block);
+        }
+    }
+    std::cout << "After inverse Zig-Zag:" << std::endl;
+    printDecodedMCU(0, 0, (frameParameter.getWidth() - 1) / (8 * frameParameter.getMaxHorizontalSampling()) + 1);
+    return true;
+}
+
+void JPEGDecoder::inverseZigZag(Block &block)
+{
+    std::vector<int> originalBlock(64, 0);
+    for (int i = 0; i < 64; ++i)
+    {
+        originalBlock[i] = block.data[ZigZagOrder[i]];
+    }
+    block.data = originalBlock;
 }
 
 bool JPEGDecoder::performIDCT()
