@@ -64,7 +64,7 @@ bool MCUDecoder::decodeBlock(ScanComponent &component, int mcuX, int mcuY)
 
     int dcCoefficient = decodeDC(dcTree, component.getComponentID());
 
-    std::vector<int> block(64, 0);
+    std::vector<double> block(64, 0);
     block[0] = dcCoefficient;
 
     if (!decodeAC(acTree, block))
@@ -101,7 +101,7 @@ int MCUDecoder::decodeDC(const std::shared_ptr<HuffmanNode> &dcTree, int compone
     return previousDCCoefficient[componentID];
 }
 
-bool MCUDecoder::decodeAC(const std::shared_ptr<HuffmanNode> &acTree, std::vector<int> &block)
+bool MCUDecoder::decodeAC(const std::shared_ptr<HuffmanNode> &acTree, std::vector<double> &block)
 {
     for (int k = 1; k < 64; ++k)
     {
@@ -151,7 +151,7 @@ int MCUDecoder::extend(int additionalBits, int size)
     return additionalBits - maxValue;
 }
 
-void MCUDecoder::storeBlock(int componentId, int x, int y, const std::vector<int> &blockData)
+void MCUDecoder::storeBlock(int componentId, int x, int y, const std::vector<double> &blockData)
 {
     Block block;
     block.data = blockData;

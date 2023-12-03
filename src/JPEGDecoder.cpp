@@ -317,7 +317,7 @@ void JPEGDecoder::dequantizeBlock(Block &block, const QuantizationTable &qTable)
 {
     for (int i = 0; i < 64; ++i)
     {
-        block.data[i] *= qTable.getValue(i);
+        block.data[i] = static_cast<double>(block.data[i]) * qTable.getValue(i);
     }
 }
 
@@ -345,7 +345,7 @@ bool JPEGDecoder::performInverseZigZag()
 
 void JPEGDecoder::inverseZigZag(Block &block)
 {
-    std::vector<int> originalBlock(64, 0);
+    std::vector<double> originalBlock(64, 0.0);
     for (int i = 0; i < 64; ++i)
     {
         originalBlock[i] = block.data[ZigZagOrder[i]];
@@ -355,7 +355,51 @@ void JPEGDecoder::inverseZigZag(Block &block)
 
 bool JPEGDecoder::performIDCT()
 {
+    for (MCU &mcu : mcus)
+    {
+        for (Block &block : mcu.YBlocks)
+        {
+            applyIDCT(block);
+        }
+        for (Block &block : mcu.CbBlocks)
+        {
+            applyIDCT(block);
+        }
+        for (Block &block : mcu.CrBlocks)
+        {
+            applyIDCT(block);
+        }
+    }
+    std::cout << "After IDCT:" << std::endl;
+    printDecodedMCU(0, 0, (frameParameter.getWidth() - 1) / (8 * frameParameter.getMaxHorizontalSampling()) + 1);
     return true;
+}
+
+void JPEGDecoder::applyIDCT(Block &block)
+{
+    std::vector<double> tempBlock(64, 0.0);
+
+    for (int x = 0; x < 8; ++x)
+    {
+        for (int y = 0; y < 8; ++y)
+        {
+            double sum = 0.0;
+            for (int u = 0; u < 8; ++u)
+            {
+                for (int v = 0; v < 8; ++v)
+                {
+                    double Cu = (u == 0) ? 0.707 : 1.0;
+                    double Cv = (v == 0) ? 0.707 : 1.0;
+                    sum += Cu * Cv * block.data[u * 8 + v] *
+                           cos((2 * x + 1) * u * M_PI / 16) *
+                           cos((2 * y + 1) * v * M_PI / 16);
+                }
+            }
+            tempBlock[x * 8 + y] = static_cast<double>(sum / 4.0);
+        }
+    }
+
+    block.data = tempBlock;
 }
 
 bool JPEGDecoder::convertColorSpace()

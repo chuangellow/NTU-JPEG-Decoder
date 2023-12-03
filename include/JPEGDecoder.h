@@ -57,6 +57,7 @@ private:
     bool performInverseZigZag();
     void inverseZigZag(Block &block);
     bool performIDCT();
+    void applyIDCT(Block &block);
     bool convertColorSpace();
     bool writeBMPFile(const std::string &filePath);
 };
