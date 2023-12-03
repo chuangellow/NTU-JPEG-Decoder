@@ -20,6 +20,9 @@ struct MCU
     std::vector<Block> YBlocks;
     std::vector<Block> CbBlocks;
     std::vector<Block> CrBlocks;
+    std::vector<Block> fullResYBlocks;
+    std::vector<Block> fullResCbBlocks;
+    std::vector<Block> fullResCrBlocks;
 };
 
 class MCUDecoder

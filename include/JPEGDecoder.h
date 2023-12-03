@@ -22,6 +22,14 @@ static const int ZigZagOrder[64] = {
     21, 34, 37, 47, 50, 56, 59, 61,
     35, 36, 48, 49, 57, 58, 62, 63};
 
+struct Color
+{
+    double r, g, b;
+
+    Color() : r(0), g(0), b(0) {}
+    Color(double red, double green, double blue) : r(red), g(green), b(blue) {}
+};
+
 class JPEGDecoder
 {
 public:
@@ -30,6 +38,7 @@ public:
 
     bool decode(const std::string &inputFilePath, const std::string &outputFilePath);
     std::vector<MCU> mcus;
+    std::vector<Color> rgbData;
 
 private:
     BitReader *bitReader;
@@ -58,8 +67,13 @@ private:
     void inverseZigZag(Block &block);
     bool performIDCT();
     void applyIDCT(Block &block);
+    bool performInverseSubsampling();
+    std::vector<Block> upsampleComponents(const std::vector<Block> &components);
+    Block upsampleBlock(const Block &block);
+    Color convertYCbCrToRGB(double Y, double Cb, double Cr);
     bool convertColorSpace();
     bool writeBMPFile(const std::string &filePath);
+    Color getPixelData(int x, int y);
 };
 
 #endif

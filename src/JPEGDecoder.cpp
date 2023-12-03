@@ -48,12 +48,16 @@ bool JPEGDecoder::decode(const std::string &inputFilePath, const std::string &ou
         return false;
     }
 
+    if (!performInverseSubsampling())
+    {
+        std::cerr << "Failed to perform inverse subsampling" << std::endl;
+        return false;
+    }
     if (!convertColorSpace())
     {
         std::cerr << "Failed to convert color space" << std::endl;
         return false;
     }
-
     if (!writeBMPFile(outputFilePath))
     {
         std::cerr << "Failed to write BMP file" << std::endl;
@@ -398,16 +402,159 @@ void JPEGDecoder::applyIDCT(Block &block)
             tempBlock[x * 8 + y] = static_cast<double>(sum / 4.0);
         }
     }
-
     block.data = tempBlock;
+}
+
+bool JPEGDecoder::performInverseSubsampling()
+{
+    for (MCU &mcu : mcus)
+    {
+        mcu.fullResCbBlocks = upsampleComponents(mcu.CbBlocks);
+        mcu.fullResCrBlocks = upsampleComponents(mcu.CrBlocks);
+    }
+    std::cout << "After inverse subsampling:" << std::endl;
+    return true;
+}
+
+std::vector<Block> JPEGDecoder::upsampleComponents(const std::vector<Block> &components)
+{
+    std::vector<Block> upsampledComponents;
+
+    for (const Block &block : components)
+    {
+        upsampledComponents.push_back(upsampleBlock(block));
+    }
+
+    return upsampledComponents;
+}
+
+Block JPEGDecoder::upsampleBlock(const Block &block)
+{
+    Block upsampledBlock;
+
+    for (int y = 0; y < 8; y += 2)
+    {
+        for (int x = 0; x < 8; x += 2)
+        {
+            double sample = block.data[(y / 2) * 4 + (x / 2)];
+            upsampledBlock.data[y * 8 + x] = sample;
+            upsampledBlock.data[y * 8 + (x + 1)] = sample;
+            upsampledBlock.data[(y + 1) * 8 + x] = sample;
+            upsampledBlock.data[(y + 1) * 8 + (x + 1)] = sample;
+        }
+    }
+
+    return upsampledBlock;
 }
 
 bool JPEGDecoder::convertColorSpace()
 {
+    rgbData.clear();
+    rgbData.resize(frameParameter.getWidth() * frameParameter.getHeight());
+
+    int mcuCountX = (frameParameter.getWidth() - 1) / (8 * frameParameter.getMaxHorizontalSampling()) + 1;
+    int mcuCountY = (frameParameter.getHeight() - 1) / (8 * frameParameter.getMaxVerticalSampling()) + 1;
+
+    for (size_t mcuY = 0; mcuY < mcuCountY; ++mcuY)
+    {
+        for (size_t mcuX = 0; mcuX < mcuCountX; ++mcuX)
+        {
+            MCU &mcu = mcus[mcuY * mcuCountX + mcuX];
+
+            for (int blockY = 0; blockY < 8; ++blockY)
+            {
+                for (int blockX = 0; blockX < 8; ++blockX)
+                {
+                    int pixelX = mcuX * 8 + blockX;
+                    int pixelY = mcuY * 8 + blockY;
+
+                    if (pixelX >= frameParameter.getWidth() || pixelY >= frameParameter.getHeight())
+                    {
+                        continue;
+                    }
+
+                    double Y = mcu.YBlocks[0].data[blockY * 8 + blockX];
+                    double Cb = mcu.fullResCbBlocks[0].data[blockY * 8 + blockX];
+                    double Cr = mcu.fullResCrBlocks[0].data[blockY * 8 + blockX];
+
+                    Color rgb = convertYCbCrToRGB(Y, Cb, Cr);
+                    rgbData[pixelY * frameParameter.getWidth() + pixelX] = rgb;
+                }
+            }
+        }
+    }
     return true;
+}
+
+Color JPEGDecoder::convertYCbCrToRGB(double Y, double Cb, double Cr)
+{
+    double R = Y + 1.402 * (Cr - 128);
+    double G = Y - 0.344136 * (Cb - 128) - 0.714136 * (Cr - 128);
+    double B = Y + 1.772 * (Cb - 128);
+
+    R = std::min(std::max(0.0, R), 255.0);
+    G = std::min(std::max(0.0, G), 255.0);
+    B = std::min(std::max(0.0, B), 255.0);
+
+    return Color(R, G, B);
 }
 
 bool JPEGDecoder::writeBMPFile(const std::string &filePath)
 {
+    std::ofstream file(filePath, std::ios::binary);
+    if (!file.is_open())
+    {
+        std::cerr << "Unable to open file: " << filePath << std::endl;
+        return false;
+    }
+
+    int width = frameParameter.getWidth();
+    int height = frameParameter.getHeight();
+
+    int rowSize = ((width * 3 + 3) / 4) * 4;
+    int imgDataSize = rowSize * height;
+
+    unsigned char bmpFileHeader[14] = {'B', 'M', 0, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0};
+
+    uint32_t fileSize = 54 + imgDataSize;
+    std::memcpy(bmpFileHeader + 2, &fileSize, 4);
+
+    file.write(reinterpret_cast<char *>(bmpFileHeader), sizeof(bmpFileHeader));
+
+    unsigned char bmpInfoHeader[40] = {};
+    std::memset(bmpInfoHeader, 0, sizeof(bmpInfoHeader));
+
+    bmpInfoHeader[0] = 40;
+    std::memcpy(bmpInfoHeader + 4, &width, 4);
+    std::memcpy(bmpInfoHeader + 8, &height, 4);
+    bmpInfoHeader[12] = 1;
+    bmpInfoHeader[14] = 24;
+
+    file.write(reinterpret_cast<char *>(bmpInfoHeader), sizeof(bmpInfoHeader));
+
+    for (int y = height - 1; y >= 0; --y)
+    {
+        for (int x = 0; x < width; ++x)
+        {
+            Color rgb = getPixelData(x, y);
+
+            unsigned char pixel[3] = {
+                static_cast<unsigned char>(rgb.b),
+                static_cast<unsigned char>(rgb.g),
+                static_cast<unsigned char>(rgb.r)};
+
+            file.write(reinterpret_cast<char *>(pixel), 3);
+        }
+
+        unsigned char padding[3] = {0, 0, 0};
+        file.write(reinterpret_cast<char *>(padding), rowSize - width * 3);
+    }
+
+    file.close();
     return true;
+}
+
+Color JPEGDecoder::getPixelData(int x, int y)
+{
+    return rgbData[y * frameParameter.getWidth() + x];
 }
