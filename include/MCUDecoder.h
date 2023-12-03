@@ -19,9 +19,12 @@ public:
 
     bool decodeMCU();
     bool decodeBlock(ScanComponent &component, int mcuX, int mcuY);
+    int decodeDC(const std::shared_ptr<HuffmanNode> &dcTree, int componentID);
+    std::vector<int> decodeAC(const std::shared_ptr<HuffmanNode> &acTree);
+    bool decodeAC(const std::shared_ptr<HuffmanNode> &acTree, std::vector<int> &block);
     int decodeSymbol(const std::shared_ptr<HuffmanNode> &tree);
     ScanComponent *findScanComponent(uint8_t componentID);
-    int readAmplitude(int size);
+    int extend(int additionalBits, int size);
     void printDecodedBlocks() const;
 
 private:

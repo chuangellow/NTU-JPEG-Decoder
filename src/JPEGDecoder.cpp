@@ -169,7 +169,7 @@ void JPEGDecoder::buildHuffmanTrees()
         {
             dcHuffmanTrees.push_back(tree);
         }
-        else
+        else if (table.getTableClass() == 1)
         {
             acHuffmanTrees.push_back(tree);
         }
@@ -213,8 +213,10 @@ bool JPEGDecoder::decodeHuffmanData()
 
     MCUDecoder mcuDecoder(compressedData, frameParameter, scanParameter, quantizationTables, dcHuffmanTrees, acHuffmanTrees);
 
-    int mcuCountX = (frameParameter.getWidth() + 7) / 8;
-    int mcuCountY = (frameParameter.getHeight() + 7) / 8;
+    int mcuCountX = (frameParameter.getWidth() - 1) / (8 * frameParameter.getMaxHorizontalSampling()) + 1;
+    int mcuCountY = (frameParameter.getHeight() - 1) / (8 * frameParameter.getMaxVerticalSampling()) + 1;
+
+    std::cout << "MCU count: " << mcuCountX << " x " << mcuCountY << std::endl;
 
     for (int y = 0; y < mcuCountY; ++y)
     {

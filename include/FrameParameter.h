@@ -31,6 +31,8 @@ public:
     uint16_t getHeight();
     uint16_t getWidth();
     uint8_t getNumComponents();
+    uint16_t getMaxHorizontalSampling();
+    uint16_t getMaxVerticalSampling();
     std::vector<FrameComponent> getComponents();
     void printFrameParameter();
 

@@ -70,6 +70,32 @@ uint16_t FrameParameter::getWidth()
     return width;
 }
 
+uint16_t FrameParameter::getMaxHorizontalSampling()
+{
+    uint16_t maxHorizontalSampling = 0;
+    for (int i = 0; i < numComponents; i++)
+    {
+        if (components[i].getHorizontalSamplingFactor() > maxHorizontalSampling)
+        {
+            maxHorizontalSampling = components[i].getHorizontalSamplingFactor();
+        }
+    }
+    return maxHorizontalSampling;
+}
+
+uint16_t FrameParameter::getMaxVerticalSampling()
+{
+    uint16_t maxVerticalSampling = 0;
+    for (int i = 0; i < numComponents; i++)
+    {
+        if (components[i].getVerticalSamplingFactor() > maxVerticalSampling)
+        {
+            maxVerticalSampling = components[i].getVerticalSamplingFactor();
+        }
+    }
+    return maxVerticalSampling;
+}
+
 uint8_t FrameParameter::getNumComponents()
 {
     return numComponents;

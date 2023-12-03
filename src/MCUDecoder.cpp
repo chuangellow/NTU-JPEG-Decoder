@@ -19,7 +19,6 @@ bool MCUDecoder::decodeMCU()
         int vSampling = (int)frameComponent.getVerticalSamplingFactor();
 
         ScanComponent *scanComponent = findScanComponent(frameComponent.getComponentID());
-        frameComponent.printComponentInfo();
         if (!scanComponent)
         {
             std::cerr << "Scan component not found for ID " << (int)frameComponent.getComponentID() << std::endl;
@@ -62,88 +61,118 @@ bool MCUDecoder::decodeBlock(ScanComponent &component, int mcuX, int mcuY)
     auto &dcTree = dcHuffmanTrees[dcTableID];
     auto &acTree = acHuffmanTrees[acTableID];
 
-    int dcCoefficient = decodeSymbol(dcTree);
+    int dcCoefficient = decodeDC(dcTree, component.getComponentID());
     if (dcCoefficient == -1)
     {
         std::cerr << "Failed to decode DC coefficient" << std::endl;
         return false;
     }
 
-    int componentID = component.getComponentID();
-    dcCoefficient += previousDCCoefficient[componentID];
-    previousDCCoefficient[componentID] = dcCoefficient;
-
     std::vector<int> block(64, 0);
     block[0] = dcCoefficient;
 
-    for (int i = 1; i < 64; ++i)
+    if (!decodeAC(acTree, block))
+    {
+        std::cerr << "Failed to decode AC coefficients" << std::endl;
+        return false;
+    }
+
+    storeBlock(component.getComponentID(), mcuX, mcuY, block);
+
+    return true;
+}
+
+int MCUDecoder::decodeDC(const std::shared_ptr<HuffmanNode> &dcTree, int componentID)
+{
+    int symbol = decodeSymbol(dcTree);
+    if (symbol == -1)
+    {
+        std::cerr << "Error decoding DC coefficient" << std::endl;
+        return -1;
+    }
+
+    int additionalBits = readBits(symbol);
+    if (additionalBits == -1)
+    {
+        std::cerr << "Error reading additional bits for DC coefficient" << std::endl;
+        return -1;
+    }
+
+    int dcCoefficient = extend(additionalBits, symbol);
+
+    previousDCCoefficient[componentID] += dcCoefficient;
+
+    return previousDCCoefficient[componentID];
+}
+
+bool MCUDecoder::decodeAC(const std::shared_ptr<HuffmanNode> &acTree, std::vector<int> &block)
+{
+    for (int k = 1; k < 64; ++k)
     {
         int symbol = decodeSymbol(acTree);
-        if (symbol == 0)
+        if (symbol == 0x00)
         { // EOB
             break;
         }
 
         int runLength = symbol >> 4;
-        int size = symbol & 0xF;
+        int additionalBitsLength = symbol & 0x0F;
 
-        i += runLength;
-        if (i >= 64)
+        k += runLength;
+
+        if (k >= 64)
         {
-            std::cerr << "Run-length exceeds block size" << std::endl;
+            std::cerr << "Error: Run-length exceeded in AC coefficients" << std::endl;
             return false;
         }
 
-        int amplitude = readAmplitude(size);
-        block[i] = amplitude;
+        int additionalBits = readBits(additionalBitsLength);
+        if (additionalBits == -1)
+        {
+            std::cerr << "Error reading additional bits for AC coefficient" << std::endl;
+            return false;
+        }
+
+        block[k] = extend(additionalBits, additionalBitsLength);
     }
 
-    // Store the block
-    storeBlock(componentID, mcuX, mcuY, block);
     return true;
 }
 
-void MCUDecoder::storeBlock(int componentId, int x, int y, const std::vector<int> &block)
-{
-    // Resize for component
-    if (decodedBlocks.size() <= componentId)
-    {
-        decodedBlocks.resize(componentId + 1);
-    }
-
-    // Resize for y-coordinate
-    if (decodedBlocks[componentId].size() <= y)
-    {
-        decodedBlocks[componentId].resize(y + 1);
-    }
-
-    // Resize for x-coordinate
-    if (decodedBlocks[componentId][y].size() <= x)
-    {
-        decodedBlocks[componentId][y].resize(x + 1);
-    }
-
-    // Store the block
-    decodedBlocks[componentId][y][x] = block;
-}
-
-int MCUDecoder::readAmplitude(int size)
+int MCUDecoder::extend(int additionalBits, int size)
 {
     if (size == 0)
     {
         return 0;
     }
-    int amplitude = readBits(size);
-    if (amplitude == -1)
+
+    int maxValue = (1 << size) - 1;
+
+    if (additionalBits > maxValue >> 1)
     {
-        return -1;
+        return additionalBits;
     }
-    int mask = 1 << (size - 1);
-    if (!(amplitude & mask))
+    return additionalBits - maxValue - 1;
+}
+
+void MCUDecoder::storeBlock(int componentId, int x, int y, const std::vector<int> &block)
+{
+    if (decodedBlocks.size() <= componentId)
     {
-        amplitude -= (1 << size) - 1;
+        decodedBlocks.resize(componentId + 1);
     }
-    return amplitude;
+
+    if (decodedBlocks[componentId].size() <= y)
+    {
+        decodedBlocks[componentId].resize(y + 1);
+    }
+
+    if (decodedBlocks[componentId][y].size() <= x)
+    {
+        decodedBlocks[componentId][y].resize(x + 1);
+    }
+
+    decodedBlocks[componentId][y][x] = block;
 }
 
 int MCUDecoder::decodeSymbol(const std::shared_ptr<HuffmanNode> &tree)
