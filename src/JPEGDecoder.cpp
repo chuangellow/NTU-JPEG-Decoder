@@ -24,9 +24,9 @@ bool JPEGDecoder::decode(const std::string &inputFilePath, const std::string &ou
         return false;
     }
 
-    if (!decodeHuffmanData())
+    if (!decodeScanData())
     {
-        std::cerr << "Failed to decode Huffman data" << std::endl;
+        std::cerr << "Failed to decode data" << std::endl;
         return false;
     }
 
@@ -207,7 +207,7 @@ void JPEGDecoder::printAllHuffmanTreePaths()
     }
 }
 
-bool JPEGDecoder::decodeHuffmanData()
+bool JPEGDecoder::decodeScanData()
 {
     buildHuffmanTrees();
 

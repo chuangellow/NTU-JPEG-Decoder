@@ -63,12 +63,6 @@ bool MCUDecoder::decodeBlock(ScanComponent &component, int mcuX, int mcuY)
     auto &acTree = acHuffmanTrees[acTableID];
 
     int dcCoefficient = decodeDC(dcTree, component.getComponentID());
-    if (dcCoefficient == -1)
-    {
-        std::cerr << "dataPos: " << dataPos << std::endl;
-        std::cerr << "Failed to decode DC coefficient" << std::endl;
-        return false;
-    }
 
     std::vector<int> block(64, 0);
     block[0] = dcCoefficient;

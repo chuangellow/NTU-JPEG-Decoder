@@ -37,7 +37,7 @@ private:
     void buildHuffmanTrees();
     void printHuffmanTreePaths(const std::shared_ptr<HuffmanNode> &node, const std::string &path);
     void printAllHuffmanTreePaths();
-    bool decodeHuffmanData();
+    bool decodeScanData();
     bool performIDCT();
     bool convertColorSpace();
     bool writeBMPFile(const std::string &filePath);
