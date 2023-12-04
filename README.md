@@ -33,6 +33,22 @@ To decode a ```.jpg``` image to a ```.bmp``` image, use the following command:
 ./JPEGDecoder <input.jpg> <output.bmp>
 ```
 
+## Automated Image Conversion
+
+To automatically convert all ```.jpg``` images in the ```Image``` directory, you can use the provided shell script ```convert_images.sh```. This script will process each image and generate a corresponding .bmp file in the same directory.
+
+First, ensure that the script is executable:
+
+```
+chmod +x convert_images.sh
+```
+
+Then run the script:
+
+```
+./convert_images.sh
+```
+
 ## Debugging with JPEGDecoderDebug
 
 The JPEGDecoderDebug executable is built with debug messages enabled. It prints detailed information about the decoding process of MCU(0, 0) at every stage, which can be useful for development and debugging purposes.
